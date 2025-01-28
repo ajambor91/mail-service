@@ -12,32 +12,32 @@
         body, html {
             overflow-x: hidden;
             overflow-y: auto;
-            font-family: 'Arial';
-            height: 100%;
+            font-family: 'Arial',serif, 'sans-serif';
             width: 100%;
         }
         .app {
             padding-top: 50px;
+            padding-bottom: 100px;
             max-width: 1280px;
             margin: auto;
+
             width: 100%;
-            height: 100%;
         }
         .app > .header-group {
             width: 100%;
             text-align: center;
         }
         .app > .header-group > .header-group__header {
-            font-size: 1.8rem;
+            font-size: 2.2rem;
             font-weight: bold;
         }
 
         .app > .header-group > .header-group__subheader {
-            font-size: 1.5rem;
+            font-size: 1.9rem;
         }
 
         .app > .main-content {
-            padding-top: 20px;
+            padding-top: 80px;
             width: 100%;
         }
         .app > .main-content > .main-content__description {
@@ -48,6 +48,13 @@
             font-size: 1.3rem;
         }
         .app > .main-content > .main-content__code-block {
+            margin: 50px;
+            font-size: 1rem;
+            border-radius: 15px;
+            border: solid 1px #ffffff;
+            padding: 30px 0;
+            display: block;
+            white-space: pre;
             background-color: #404040;
         }
     </style>
@@ -89,33 +96,34 @@
                 <p class="main-content__description">Also, you can set send email as HTML:</p>
                 <code class="main-content__code-block">
                     { <br>
-                    "message": { <br>
-                        "content": "Your message content", <br>
-                    }, <br>
-                    "isHTML": true, <br>
-                    "title": "Message to you!", <br>
-                    "recipientMail": ["recipient@mail.example", "another-recipient@mail.example"], <br>
-                    "ccMail": ["copy@mail.example", "another-copy@mail.example"], <br>
-                    "bccMail": ["hidden-copy@mail.example", "another-hidden@mail.example"] <br>
+                        "message": { <br>
+                            "content": "Your message content", <br>
+                        }, <br>
+                        "isHTML": true, <br>
+                        "title": "Message to you!", <br>
+                        "recipientMail": ["recipient@mail.example", "another-recipient@mail.example"], <br>
+                        "ccMail": ["copy@mail.example", "another-copy@mail.example"], <br>
+                        "bccMail": ["hidden-copy@mail.example", "another-hidden@mail.example"] <br>
                     }
                 </code>
                 <p class="main-content__description">Set custom template for each email:</p>
                 <code class="main-content__code-block">
                     { <br>
-                    "message": { <br>
-                    "content": "Your message content", <br>
-                    }, <br>
-                    "isHTML": true, <br>
-                    "template": "your_template_name",<br>
-                    "title": "Message to you!", <br>
-                    "recipientMail": ["recipient@mail.example", "another-recipient@mail.example"], <br>
-                    "ccMail": ["copy@mail.example", "another-copy@mail.example"], <br>
-                    "bccMail": ["hidden-copy@mail.example", "another-hidden@mail.example"] <br>
+                        "message": { <br>
+                        "content": "Your message content", <br>
+                        }, <br>
+                        "isHTML": true, <br>
+                        "template": "your_template_name",<br>
+                        "title": "Message to you!", <br>
+                        "recipientMail": ["recipient@mail.example", "another-recipient@mail.example"], <br>
+                        "ccMail": ["copy@mail.example", "another-copy@mail.example"], <br>
+                        "bccMail": ["hidden-copy@mail.example", "another-hidden@mail.example"] <br>
                     }
                 </code>
                 <p class="main-content__description">Note:<br>
                     You can set default sending as html in .env file with IS_HTML option set as true, default template is mail.html in templates/ directory, also you can create your own template and type it name's into payload
                 </p>
+
 
             </div>
         </div>
