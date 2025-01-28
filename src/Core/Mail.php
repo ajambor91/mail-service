@@ -8,14 +8,25 @@ use MailService\MailService\Exceptions\InvalidPayload;
  */
 class Mail implements IMail
 {
+
+    /**
+     * @var string
+     */
+    private ?string $template = null;
+
+    /**
+     * @var bool
+     */
+    private bool $isHTML;
+
     /**
      * @var string
      */
     private string $title;
     /**
-     * @var string
+     * @var string | array
      */
-    private string $message;
+    private string | array $message;
     /**
      * @var string|array
      */
@@ -83,11 +94,27 @@ class Mail implements IMail
     }
 
     /**
-     * @return string
+     * @return string|array
      */
-    public function getMessage(): string
+    public function getMessage(): string | array
     {
         return $this->message;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsHTML(): bool
+    {
+        return $this->isHTML;
+    }
+
+    /**
+     * @return string | null
+     */
+    public function getTemplate(): string | null
+    {
+        return $this->template;
     }
 
     /**
@@ -134,6 +161,17 @@ class Mail implements IMail
             }
             $this->bccMail = $bccMail;
         }
+
+        if (!empty($payload['isHTML']) && $payload['isHTML'] === true) {
+            $this->isHTML = true;
+            if (!empty($payload['template'])) {
+                $this->template = $payload['template'];
+            }
+        } else {
+            $this->isHTML = false;
+        }
+
+
 
         $title = $payload['title'] ?? $this->env->getDefaultTile();
         $this->title = $title;

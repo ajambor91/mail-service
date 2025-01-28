@@ -25,6 +25,35 @@ Also you can set multiple recipients, cc and bcc like this:
 }
 ```
 
+If you want to send a message as html you can send payload as this:
+```text
+{ 
+    "message": { 
+        "content": "Your message content", 
+    },
+    "isHTML": true,
+    "title": "Message to you!", 
+    "recipientMail": ["recipient@mail.example", "another-recipient@mail.example"], 
+    "ccMail": ["copy@mail.example", "another-copy@mail.example"], 
+    "bccMail": ["hidden-copy@mail.example", "another-hidden@mail.example"] 
+}
+```
+Template file is set in templates directory in project root. You can change this file and set your own keys for replacement in {{ key }}, also you can set different template for each message like this:
+
+```text
+{ 
+    "message": { 
+        "content": "Your message content", 
+    },
+    "template": "your_template_name",
+    "isHTML": true,
+    "title": "Message to you!", 
+    "recipientMail": ["recipient@mail.example", "another-recipient@mail.example"], 
+    "ccMail": ["copy@mail.example", "another-copy@mail.example"], 
+    "bccMail": ["hidden-copy@mail.example", "another-hidden@mail.example"] 
+}
+```
+And create your template file with same name as in payload.
 ## Getting started
 Clone this repo, then run:
 

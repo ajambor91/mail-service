@@ -165,4 +165,16 @@ class Env
         return !empty($allowedDomains) ? $allowedDomains : null;
     }
 
+    /**
+     * @return bool
+     */
+    public function getIsHTML()
+    {
+        $isHTML = $_ENV['IS_HTML'];
+        if ($isHTML === true || strtolower($isHTML) === 'true') {
+            return true;
+        }
+        return false;
+    }
+
 }

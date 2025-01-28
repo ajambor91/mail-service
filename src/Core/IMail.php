@@ -8,9 +8,18 @@ interface IMail
 {
 
     /**
-     * @return string
+     * @return bool
      */
-    public function getMessage(): string;
+    public function getIsHTML(): bool;
+    /**
+     * @return string | null
+     */
+    public function getTemplate(): string | null;
+
+    /**
+     * @return string|array
+     */
+    public function getMessage(): string | array;
 
     /**
      * @return string|array

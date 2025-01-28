@@ -46,7 +46,7 @@ class Mailer
     /**
      * @var Mail
      */
-    private Mail $mail;
+    private IMail $mail;
 
     /**
      * @param Mail $mail
@@ -207,12 +207,29 @@ class Mailer
      * @throws \PHPMailer\PHPMailer\Exception
      */
     private function addMessageData(): void
-    {
-        $this->phpMailer->isHTML(true);
+    {   $isHtml = false;
+        if (!empty($this->mail->getIsHTML()) && $this->mail->getIsHTML() === true ) {
+            $isHtml = true;
+        }
+        if ($isHtml === false && $this->env->getIsHTML() === true) {
+            $isHtml = true;
+        }
+        $this->phpMailer->isHTML($isHtml);
         if ($this->mail->getTitle()) {
             $this->phpMailer->Subject = $this->mail->getTitle();
         }
-        $this->phpMailer->Body = $this->mail->getMessage();
+        $message = null;
+
+        if ($isHtml) {
+            if (!is_array($this->mail->getMessage())) {
+                throw new \Exception("Message for html e-mail must be an array");
+            }
+            $htmlParser = new HTMLMessage($this->mail);
+            $message = $htmlParser->getTemplate($this->mail->getMessage());
+        } elseif (is_string($this->mail->getMessage())) {
+            $message = $this->mail->getMessage();
+        }
+        $this->phpMailer->Body = $message;
         $this->phpMailer->setFrom($this->sender);
     }
 }
