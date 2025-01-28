@@ -1,0 +1,44 @@
+<html>
+    <head>
+        <title>Mail Service</title>
+        <link type="text/css" href="/src/views/style.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="app">
+            <div class="header-group">
+                <h1 class="header-group__header">Mail Service</h1>
+                <h2 class="header-group__subheader">Simply messaging, send request & send message </h2>
+            </div>
+            <div class="main-content">
+                <p class="main-content__description">
+                    How it works:
+                </p>
+                <ul class="main-content__list">
+                    <li>Rename .env.example to .env</li>
+                    <li>Fill .env file with your e-mail account data</li>
+                    <li>Send request using POST for http://your-domain.example/send</li>
+                </ul>
+                <p class="main-content__description">Example payload:</p>
+                <code>
+                    { <br>
+                        "message": "Your message content", <br>
+                        "title": "Message to you!", <br>
+                        "recipientMail": "recipient@mail.example", <br>
+                        "ccMail": "copy@mail.example", <br>
+                        "bccMail": "hidden-copy@mail.example" <br>
+                    }
+                </code>
+                <p class="main-content__description">Also, you can set multiple recipients, add CC (carbon copy) or BCC (blind carbon copy) recipients like this:</p>
+                <code>
+                    { <br>
+                        "message": "Your message content", <br>
+                        "title": "Message to you!", <br>
+                        "recipientMail": ["recipient@mail.example", "another-recipient@mail.example"], <br>
+                        "ccMail": ["copy@mail.example", "another-copy@mail.example"], <br>
+                        "bccMail": ["hidden-copy@mail.example", "another-hidden@mail.example"] <br>
+                    }
+                </code>
+            </div>
+        </div>
+    </body>
+</html>

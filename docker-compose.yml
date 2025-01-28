@@ -1,0 +1,8 @@
+services:
+  mail:
+    build: './'
+    volumes:
+      - ./:/var/www/html
+      - ./000-default.conf:/etc/apache2/sites-available/000-default.conf
+    ports:
+      - 8011:80
