@@ -109,7 +109,8 @@ class Mailer
      * @return void
      * @throws \PHPMailer\PHPMailer\Exception
      */
-    public function sendMessage(): void {
+    public function sendMessage(): void
+    {
         $this->phpMailer->send();
     }
 
@@ -117,7 +118,8 @@ class Mailer
      * Method for setup PHPMailer data
      * @return $this
      */
-    public function setup(): self {
+    public function setup(): self
+    {
         if ($this->isSMTP) {
             $this->phpMailer->isSMTP();
             $this->phpMailer->SMTPAuth = true;
@@ -149,7 +151,8 @@ class Mailer
      * @return void
      * @throws \PHPMailer\PHPMailer\Exception
      */
-    private function addRecipients(): void {
+    private function addRecipients(): void
+    {
         $recipients = $this->mail->getRecipientMail();
         if (is_array($recipients)) {
             foreach ($recipients as $recipient) {
@@ -157,26 +160,6 @@ class Mailer
             }
         } else {
             $this->phpMailer->addAddress($recipients);
-        }
-    }
-
-    /**
-     * Adding bcc to message
-     * @return void
-     * @throws \PHPMailer\PHPMailer\Exception
-     */
-    private function addBCC(): void
-    {
-        $bcc = $this->mail->getBccMail();
-        if (empty($bcc)) {
-            return;
-        }
-        if (is_array($bcc)) {
-            foreach ($bcc as $item) {
-                $this->phpMailer->addBCC($item);
-            }
-        } else {
-            $this->phpMailer->addBCC($bcc);
         }
     }
 
@@ -202,13 +185,34 @@ class Mailer
     }
 
     /**
+     * Adding bcc to message
+     * @return void
+     * @throws \PHPMailer\PHPMailer\Exception
+     */
+    private function addBCC(): void
+    {
+        $bcc = $this->mail->getBccMail();
+        if (empty($bcc)) {
+            return;
+        }
+        if (is_array($bcc)) {
+            foreach ($bcc as $item) {
+                $this->phpMailer->addBCC($item);
+            }
+        } else {
+            $this->phpMailer->addBCC($bcc);
+        }
+    }
+
+    /**
      * Adding message content
      * @return void
      * @throws \PHPMailer\PHPMailer\Exception
      */
     private function addMessageData(): void
-    {   $isHtml = false;
-        if (!empty($this->mail->getIsHTML()) && $this->mail->getIsHTML() === true ) {
+    {
+        $isHtml = false;
+        if (!empty($this->mail->getIsHTML()) && $this->mail->getIsHTML() === true) {
             $isHtml = true;
         }
         if ($isHtml === false && $this->env->getIsHTML() === true) {
@@ -222,7 +226,7 @@ class Mailer
 
         if ($isHtml) {
             if (!is_array($this->mail->getMessage())) {
-                throw new \Exception("Message for html e-mail must be an array");
+                throw new Exception("Message for html e-mail must be an array");
             }
             $htmlParser = new HTMLMessage($this->mail);
             $message = $htmlParser->getTemplate($this->mail->getMessage());

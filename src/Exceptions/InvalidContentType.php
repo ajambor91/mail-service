@@ -1,4 +1,5 @@
 <?php
+
 namespace MailService\MailService\Exceptions;
 
 use Exception;

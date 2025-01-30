@@ -20,16 +20,18 @@ class Router
      * @const host path
      */
     private const HOST_PATH = '/';
+
     /**
      * Check route and methods, when find route for sending message return true, else return false for showing homepage
      * @return bool
      */
-    public function checkPathForMail()
+    public function checkPathForMail(array $server)
     {
-        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $method = $_SERVER['REQUEST_METHOD'];
+        $requestUri = $server['REQUEST_URI'];
+        $path = parse_url($requestUri, PHP_URL_PATH);
+        $method = $server['REQUEST_METHOD'];
         if ($path !== self::HOST_PATH && $path !== self::PATH_FOR_MAIL) {
-            header("Location: ".self::HOST_PATH);
+            header("Location: " . self::HOST_PATH);
             exit();
         }
         if ($path === self::PATH_FOR_MAIL && $method === self::METHOD_FOR_MAIL) {

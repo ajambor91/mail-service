@@ -1,4 +1,5 @@
 <?php
+
 namespace MailService\MailService\Core;
 
 /**
@@ -7,7 +8,7 @@ namespace MailService\MailService\Core;
 class View
 {
     /**
-     *
+     * @const VIEW_PATH
      */
     private const VIEW_PATH = ROOT . '/src/views/index.html';
 

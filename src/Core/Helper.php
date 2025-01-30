@@ -14,7 +14,7 @@ class Helper
      */
     public static function parseEnvArray(string $envArgument): array
     {
-        $envArgument = preg_replace('/[\[\'\]]/','',$envArgument);
+        $envArgument = preg_replace('/[\[\'\]]/', '', $envArgument);
         $envArgument = explode(',', $envArgument);
         return $envArgument;
     }
@@ -24,7 +24,7 @@ class Helper
      * @param string|array $email
      * @return bool
      */
-    public static function checkEmailValidity(string | array $email): bool
+    public static function checkEmailValidity(string|array $email): bool
     {
         if (is_array($email)) {
             foreach ($email as $item) {

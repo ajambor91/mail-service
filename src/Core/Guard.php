@@ -1,7 +1,10 @@
 <?php
+
 namespace MailService\MailService\Core;
 
+use DomainException;
 use MailService\MailService\Exceptions\InvalidContentType;
+use MailService\MailService\Exceptions\InvalidDomain;
 use MailService\MailService\Exceptions\InvalidSecret;
 
 /**
@@ -20,7 +23,7 @@ class Guard
     /**
      * @var array|null
      */
-    private array | null $allowedDomains;
+    private array|null $allowedDomains;
     /**
      * @var string
      */
@@ -36,14 +39,15 @@ class Guard
     public function __construct(IHeaders $headers)
     {
         $this->headers = $headers;
-        $this->init();;
+        $this->init();
     }
 
     /**
      * Initializing object
      * @return void
      */
-    private function init(): void {
+    private function init(): void
+    {
         $this->env = Env::getInstance();
         $this->allowedDomains = $this->env->getAllowedDomains();
         $this->secret = $this->env->getSecret();
@@ -55,11 +59,29 @@ class Guard
      * @throws InvalidContentType
      * @throws InvalidSecret
      */
-    public function checkAccess(): bool {
+    public function checkAccess(): bool
+    {
         $isAllowedDomain = $this->checkDomains();
         $isRightSecret = $this->checkSecret();
         $isAppJson = $this->checkContentType();
         return $isAppJson && $isAllowedDomain && $isRightSecret;
+    }
+
+    /**
+     * Checking domain
+     * @return bool
+     */
+    private function checkDomains(): bool
+    {
+
+        if ($this->allowedDomains == null) {
+            return true;
+        } elseif ($this->iterateOverDomains()) {
+            return true;
+        }
+
+        throw new InvalidDomain("Invalid domain");
+
     }
 
     /**
@@ -77,6 +99,21 @@ class Guard
     }
 
     /**
+     * Method iterating over .env domains and compare it to request's host
+     * @return bool
+     */
+    private function iterateOverDomains(): bool{
+
+            foreach ($this->allowedDomains as $allowedDomain) {
+                if ($allowedDomain === $this->headers->getHost()) {
+                    Response::getInstance()->setAllowedDomain($allowedDomain);
+                    return true;
+                }
+            }
+            return false;
+    }
+
+    /**
      * Checking content type
      * @return bool
      * @throws InvalidContentType
@@ -87,27 +124,5 @@ class Guard
             throw new InvalidContentType("Invalid content type");
         }
         return true;
-    }
-
-    /**
-     * Checking domain
-     * @return bool
-     */
-    private function checkDomains(): bool {
-        if ($this->allowedDomains == null) {
-            return true;
-        } elseif (function () {
-            foreach ($this->allowedDomains as $allowedDomain) {
-                if ($allowedDomain === $this->headers->getHost()) {
-                    Response::getInstance()->setAllowedDomain($allowedDomain);
-                    return true;
-                }
-            }
-            return false;
-        }){
-            return true;
-        }
-        throw new \DomainException("Invalid domain");
-
     }
 }

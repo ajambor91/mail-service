@@ -1,6 +1,8 @@
 <?php
+
 namespace MailService\MailService\Core;
 
+use Exception;
 use MailService\MailService\Exceptions\InvalidContentType;
 use MailService\MailService\Exceptions\InvalidSecret;
 
@@ -21,7 +23,7 @@ class Headers implements IHeaders
     /**
      *
      */
-    private const CONTENT_TYPE ='CONTENT_TYPE';
+    private const CONTENT_TYPE = 'CONTENT_TYPE';
     /**
      * @var string|null
      */
@@ -38,18 +40,17 @@ class Headers implements IHeaders
     /**
      *
      */
-    public function __construct()
+    public function __construct(array $headers)
     {
-        $this->getHeaders();
+        $this->getHeaders($headers);
     }
 
     /**
      * Parse request headers and set these for thic class
      * @return void
      */
-    private function getHeaders(): void
+    private function getHeaders(array $headers): void
     {
-        $headers = $_SERVER;
         foreach ($headers as $key => $header) {
             if (self::CONTENT_TYPE === $key) {
                 $this->contentType = $header;
@@ -61,7 +62,6 @@ class Headers implements IHeaders
                 $this->secret = $header;
             }
         }
-
     }
 
     /**
@@ -93,11 +93,12 @@ class Headers implements IHeaders
     /**
      * Get host from request header
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getHost(): string {
+    public function getHost(): string
+    {
         if (empty($this->host)) {
-            throw new \Exception("No host found");
+            throw new Exception("No host found");
         }
         return $this->host;
     }

@@ -1,6 +1,7 @@
 <?php
 
 namespace MailService\MailService\Core;
+
 use MailService\MailService\Exceptions\InvalidPayload;
 
 /**
@@ -26,21 +27,21 @@ class Mail implements IMail
     /**
      * @var string | array
      */
-    private string | array $message;
+    private string|array $message;
     /**
      * @var string|array
      */
-    private string | array $recipientMail;
+    private string|array $recipientMail;
 
     /**
      * @var string|array
      */
-    private string | array $ccMail;
+    private string|array $ccMail;
 
     /**
      * @var string|array
      */
-    private string | array $bccMail;
+    private string|array $bccMail;
 
     /**
      * @var string
@@ -52,79 +53,23 @@ class Mail implements IMail
     private Env $env;
 
     /**
+     * @param array $payload
      * @throws InvalidPayload
      */
-    public function __construct()
+    public function __construct(array $payload)
     {
         $this->env = Env::getInstance();
-        $this->initMail();
-    }
-
-    /**
-     * @return string|array
-     */
-    public function getCCMail(): string | array
-    {
-        return $this->ccMail;
-    }
-
-    /**
-     * @return string|array
-     */
-    public function getBccMail(): string | array
-    {
-        return $this->bccMail;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTitle(): string
-    {
-        return $this->title;
-    }
-
-    /**
-     * @return string|array
-     */
-
-    public function getRecipientMail(): string | array
-    {
-        return $this->recipientMail;
-    }
-
-    /**
-     * @return string|array
-     */
-    public function getMessage(): string | array
-    {
-        return $this->message;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getIsHTML(): bool
-    {
-        return $this->isHTML;
-    }
-
-    /**
-     * @return string | null
-     */
-    public function getTemplate(): string | null
-    {
-        return $this->template;
+        $this->initMail($payload);
     }
 
     /**
      * Initializing e-mail object method and validiting request payload
+     * @param array $payload
      * @return void
      * @throws InvalidPayload
      */
-    private function initMail(): void
+    private function initMail(array $payload): void
     {
-        $payload = json_decode(file_get_contents('php://input'), true);
         if (empty($payload)) {
             throw new InvalidPayload("No payload found");
         }
@@ -134,7 +79,6 @@ class Mail implements IMail
 
         }
         $this->message = $payload['message'];
-
 
 
         $recipientMail = $payload['recipientMail'] ?? $this->env->getRecipientEmail();
@@ -172,10 +116,66 @@ class Mail implements IMail
         }
 
 
-
         $title = $payload['title'] ?? $this->env->getDefaultTile();
         $this->title = $title;
 
+    }
+
+    /**
+     * @return string|array
+     */
+    public function getCCMail(): string|array
+    {
+        return $this->ccMail;
+    }
+
+    /**
+     * @return string|array
+     */
+    public function getBccMail(): string|array
+    {
+        return $this->bccMail;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    /**
+     * @return string|array
+     */
+
+    public function getRecipientMail(): string|array
+    {
+        return $this->recipientMail;
+    }
+
+    /**
+     * @return string|array
+     */
+    public function getMessage(): string|array
+    {
+        return $this->message;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsHTML(): bool
+    {
+        return $this->isHTML;
+    }
+
+    /**
+     * @return string | null
+     */
+    public function getTemplate(): string|null
+    {
+        return $this->template;
     }
 
 }

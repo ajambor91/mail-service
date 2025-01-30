@@ -1,12 +1,18 @@
 <?php
+
 namespace MailService\MailService\Core;
 
 /**
- * Response class responsible 
+ * Response class responsible
  */
 class Response
 {
 
+
+    /**
+     * @var string|null
+     */
+    private ?string $debugMessage = null;
     /**
      * @var Response|null
      */
@@ -24,6 +30,11 @@ class Response
 
 
     /**
+     * @var Env
+     */
+    private Env $env;
+
+    /**
      * @var array
      */
     private array $message;
@@ -38,14 +49,15 @@ class Response
      */
     private function __construct()
     {
-
+        $this->env = Env::getInstance();
     }
 
     /**
      * Returning self instance
      * @return Response
      */
-    public static function getInstance(): Response {
+    public static function getInstance(): Response
+    {
         if (!Response::$instance) {
             Response::$instance = new Response();
         }
@@ -74,31 +86,47 @@ class Response
     }
 
     /**
+     * Setting response debug message
+     * @param array $debugMessage
+     * @return void
+     */
+    public function setDebugMessage(string $debugMessage): void
+    {
+        $this->debugMessage = $debugMessage;
+    }
+
+    /**
      * Setting HTTP response code
      * @param int $code
      * @return void
      */
-    public function setCode(int $code): void {
-        $this->code =$code;
+    public function setCode(int $code): void
+    {
+        $this->code = $code;
     }
 
     /**
      * Returning HTTP response
      * @return void
      */
-    public function returnResponse(): void {
+    public function returnResponse(): string|false
+    {
         foreach ($this->headers as $key => $header) {
             header("$key: $header");
         }
 
         if (empty($this->message)) {
             http_response_code(500);
-            echo json_encode(['message'=> "Message is empty"]);
-            exit;
+            return json_encode(['message' => "Message is empty"]);
         }
         http_response_code($this->code);
-        echo json_encode($this->message);
-        exit;
+
+        if ($this->env->getIsDebug() === true) {
+            echo $this->debugMessage;
+            return json_encode(array_merge($this->message, ['debugMessage' =>$this->debugMessage]));
+        }
+        return json_encode($this->message);
+
     }
 
 

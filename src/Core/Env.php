@@ -3,6 +3,7 @@
 namespace MailService\MailService\Core;
 
 use Dotenv\Dotenv;
+use Exception;
 
 /**
  * Helper for getting and parsing data from .env
@@ -23,6 +24,7 @@ class Env
      */
     private function __construct()
     {
+
         $this->dotEnv = Dotenv::createImmutable(ROOT);
         $this->dotEnv->load();
     }
@@ -57,7 +59,20 @@ class Env
     /**
      * @return bool
      */
-    public function getIsSMTP(): bool {
+    public function getIsDebug(): bool
+    {
+        $isDebug = false;
+        if ($_ENV['IS_DEBUG'] === true || strtolower($_ENV['IS_DEBUG']) === 'true') {
+            $isDebug = true;
+        }
+        return $isDebug;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsSMTP(): bool
+    {
         $isSMTP = $_ENV['SMTP'];
         if ($isSMTP === false || strtolower($isSMTP) === 'false') {
             return false;
@@ -96,7 +111,7 @@ class Env
     {
         $senderEmail = $_ENV['SENDER_EMAIL'];
         if (empty($senderEmail) || !Helper::checkEmailValidity($senderEmail)) {
-            throw new \Exception("Invalid sender email in .env");
+            throw new Exception("Invalid sender email in .env");
         }
         return $senderEmail;
     }
@@ -112,9 +127,10 @@ class Env
     /**
      * @return string|array
      */
-    public function getRecipientEmail(): string | array
+    public function getRecipientEmail(): string|array
     {
 
+        $recipientMail = $_ENV['RECIPIENT_MAIL'];
         $recipientMail = Helper::parseEnvArray($recipientMail);
         if (empty($recipientMail)) {
             $recipientMail = $_ENV['ADMIN_EMAIL'];
@@ -122,20 +138,20 @@ class Env
             $recipientMail = $recipientMail[0];
         }
         if (!empty($recipientMail) && !Helper::checkEmailValidity($recipientMail)) {
-            throw new \Exception("Invalid recipient email in .env");
+            throw new Exception("Invalid recipient email in .env");
         }
-        return  $recipientMail;
+        return $recipientMail;
     }
 
     /**
      * @return array|string
      */
-    public function getBCCMail(): array | string
+    public function getBCCMail(): array|string
     {
         $bccMail = $_ENV['BCC_MAIL'];
         $bccMail = Helper::parseEnvArray($bccMail);
         if (!empty($bccMail) && !Helper::checkEmailValidity($bccMail)) {
-            throw new \Exception("Invalid bcc email in .env");
+            throw new Exception("Invalid bcc email in .env");
 
         }
         return count($bccMail) === 1 ? $bccMail[0] : $bccMail;
@@ -144,12 +160,12 @@ class Env
     /**
      * @return array|string
      */
-    public function getCCMail(): array | string
+    public function getCCMail(): array|string
     {
         $ccMail = $_ENV['CC_MAIL'];
         $ccMail = Helper::parseEnvArray($ccMail);
         if (!empty($ccMail) && !Helper::checkEmailValidity($ccMail)) {
-            throw new \Exception("Invalid cc email in .env");
+            throw new Exception("Invalid cc email in .env");
         }
         return count($ccMail) === 1 ? $ccMail[0] : $ccMail;
     }
@@ -157,10 +173,10 @@ class Env
     /**
      * @return array|null
      */
-    public function getAllowedDomains(): array | null
+    public function getAllowedDomains(): array|null
     {
         $allowedDomains = $_ENV['ALLOWED_DOMAINS'];
-        $allowedDomains = preg_replace('/[\[\'\]]/','',$allowedDomains);
+        $allowedDomains = preg_replace('/[\[\'\]]/', '', $allowedDomains);
         $allowedDomains = explode(',', $allowedDomains);
         return !empty($allowedDomains) ? $allowedDomains : null;
     }

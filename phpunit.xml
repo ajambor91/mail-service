@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="src/tests/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
+         executionOrder="depends,defects"
+         shortenArraysForExportThreshold="10"
+         requireCoverageMetadata="true"
+         beStrictAboutCoverageMetadata="true"
+         beStrictAboutOutputDuringTests="true"
+         displayDetailsOnPhpunitDeprecations="true"
+         failOnPhpunitDeprecation="true"
+         failOnRisky="true"
+         failOnWarning="true">
+    <testsuites>
+        <testsuite name="default">
+            <directory>src/tests</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="SECRET" value="SECRET" force="true"/>
+        <env name="SENDER_EMAIL" value="sender@sender.com" force="true"/>
+        <env name="DEFAULT_TITLE" value="Test title" force="true"/>
+        <env name="USERNAME" value="testUsername" force="true"/>
+        <env name="PASSWORD" value="testPassword" force="true"/>
+        <env name="ALLOWED_DOMAINS" value="['localhost']" force="true"/>
+        <env name="PORT" value="465" force="true"/>
+        <env name="IS_DEBUG" value="false" force="true"/>
+    </php>
+    <source ignoreIndirectDeprecations="true" restrictNotices="true" restrictWarnings="true">
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
+</phpunit>
