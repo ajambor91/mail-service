@@ -7,6 +7,7 @@ use MailService\MailService\Core\Env;
 use MailService\MailService\Core\Guard;
 use MailService\MailService\Core\Headers;
 use MailService\MailService\Core\IHeaders;
+use MailService\MailService\Core\Logger;
 use MailService\MailService\Core\Mail;
 use MailService\MailService\Core\Mailer;
 use MailService\MailService\Core\Response;
@@ -22,6 +23,9 @@ use MailService\MailService\Exceptions\InvalidSecret;
  */
 class App
 {
+
+    private Logger $logger;
+    private string $uuid;
     /**
      * @var bool
      */
@@ -57,6 +61,8 @@ class App
      * @var IHeaders
      */
     private IHeaders $headers;
+
+
     /**
      * @var Env
      */
@@ -73,6 +79,15 @@ class App
      */
     private Response $response;
 
+    public function __construct()
+    {
+        $uuid = bin2hex(random_bytes(16));
+        $uuid = vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split($uuid, 4));
+        $this->uuid = $uuid;
+        $this->logger = Logger::getInstance();
+    }
+
+
     /**
      * Method for set request payload
      * @param array $payload
@@ -86,6 +101,8 @@ class App
             return $this;
         }
         $this->payload = $payload;
+       $this->logger->log($this->uuid, 'Payload set: ' . json_encode($this->payload));
+
         return $this;
     }
 
@@ -97,6 +114,8 @@ class App
     public function setServerData(array $server): self
     {
         $this->server = $server;
+        $this->logger->log($this->uuid, 'Server data set: ' . json_encode($this->server));
+
         return $this;
     }
 
@@ -106,6 +125,8 @@ class App
      */
     public function setRouter(): self
     {
+        $this->logger->log($this->uuid, 'Router set: ' . json_encode($this->payload));
+
         if (!$this->server) {
             $this->sendInternalServerError();
             $this->isError = true;
@@ -113,6 +134,8 @@ class App
         }
         $this->router = new Router();
         if (!$this->router->checkPathForMail($this->server)) {
+            $this->logger->log($this->uuid, 'Redirected into main view');
+
             $view = new View();
             $view->showView();
         }
@@ -130,6 +153,8 @@ class App
             $this->isError = true;
             return $this;
         }
+        $this->logger->log($this->uuid, 'Response set');
+
         $this->response = Response::getInstance();
         return $this;
     }
@@ -149,6 +174,8 @@ class App
             $this->sendInternalServerError();
             $this->sendResponse();
         }
+        $this->logger->log($this->uuid, 'Message send: ' . json_encode($this->payload));
+
         $this->mailer->setup()->prepare()->sendMessage();
         return $this;
 
@@ -161,6 +188,8 @@ class App
     public function setupApp(): self
     {
         try {
+            $this->logger->log($this->uuid, 'Created mail: ' . json_encode($this->payload));
+
             $mail = new Mail($this->payload);
             $this->mailer = $this->createMailer($mail);
 
@@ -182,6 +211,7 @@ class App
         if (!$this->response) {
             $this->sendInternalServerError();
         }
+        $this->logger->log($this->uuid, 'Returned response: ' . $this->responseToReturn);
 
         echo $this->responseToReturn;
         exit;
@@ -195,9 +225,12 @@ class App
     public function handleResponse(): self
     {
         if ($this->isError) {
+            $this->logger->log($this->uuid, $this->errorMessage);
             $this->response->setDebugMessage($this->errorMessage);
             return $this;
         }
+        $this->logger->log($this->uuid, 'Handled response: ' . $this->responseToReturn . ' code: ' . 200);
+
         $this->response->setCode(200);
         $this->response->setMessage(["message" => 'Message was send']);
         $this->responseToReturn = $this->response->returnResponse();
@@ -246,6 +279,8 @@ class App
      */
     private function sendInvalidSecret(): void
     {
+        $this->logger->log($this->uuid, 'Send invalid secret: ' . json_encode($this->payload) . ' code: ' . 401);
+
         $this->response->setCode(401);
         $this->response->setMessage(["message" => 'Invalid secret']);
         $this->responseToReturn = $this->response->returnResponse();
@@ -257,6 +292,8 @@ class App
      */
     private function sendInvalidDomain(): void
     {
+        $this->logger->log($this->uuid, 'Send invalid domain: ' . json_encode($this->payload) . ' code: ' . 403);
+
         $this->response->setCode(403);
         $this->response->setMessage(["message" => 'Domain not allowed']);
         $this->responseToReturn = $this->response->returnResponse();
@@ -268,6 +305,8 @@ class App
      */
     private function sendInvalidPayload(): void
     {
+        $this->logger->log($this->uuid, 'Send invalid payload: ' . json_encode($this->payload) . ' code: ' . 400);
+
         $this->response->setCode(400);
         $this->response->setMessage(["message" => 'Invalid payload']);
         $this->responseToReturn = $this->response->returnResponse();
@@ -280,6 +319,8 @@ class App
      */
     private function sendInvalidContentTypen(): void
     {
+        $this->logger->log($this->uuid, 'Send invalid content type: ' . json_encode($this->payload) . ' code: ' . 400);
+
         $this->response->setCode(400);
         $this->response->setMessage(["message" => 'Content-Type should be application/json']);
         $this->responseToReturn = $this->response->returnResponse();
@@ -291,6 +332,8 @@ class App
      */
     private function sendInternalServerError(): void
     {
+        $this->logger->log($this->uuid, 'Send inernal server error: ' . json_encode($this->payload) . ' code: ' . 500);
+
         $this->response->setCode(500);
         $this->response->setMessage(["message" => 'Internal Server Error']);
         $this->responseToReturn = $this->response->returnResponse();

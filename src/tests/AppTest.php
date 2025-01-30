@@ -5,6 +5,7 @@ namespace MailService\MailService\Tests;
 
 use Exception;
 use MailService\MailService\App;
+use MailService\MailService\Core\Logger;
 use MailService\MailService\Core\Mail;
 use MailService\MailService\Core\Mailer;
 use MailService\MailService\Core\Router;
@@ -192,6 +193,7 @@ final class AppTest extends TestCase
     protected function setup(): void
     {
         $this->app = new App();
+        $this->mockLogger();
     }
 
     /**
@@ -220,6 +222,22 @@ final class AppTest extends TestCase
         $appReflector = new ReflectionClass($this->app);
         $appReflectorProp = $appReflector->getProperty('responseToReturn');
         return $appReflectorProp->getValue($this->app);
+    }
+
+    /**
+     * Mocking logger
+     * @return void
+     * @throws ReflectionException
+     */
+    private function mockLogger(): void
+    {
+        $loggerMock = $this->getMockBuilder(Logger::class)
+            ->onlyMethods(['log'])
+            ->getMock();
+
+        $reflector = new ReflectionProperty($this->app, 'logger');
+        $reflector->setAccessible(true);
+        $reflector->setValue($this->app, $loggerMock);
     }
 
 }

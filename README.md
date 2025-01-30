@@ -85,6 +85,8 @@ This app should run on any hosting which support PHP interpreter.
 ### Debug Mode
 You can enable debug mode set IS_DEBUG on true in .env file, when this option is enabled all server messages will contains additional debugMessage field
 
+### Logs
+Logs are in /logs directory, each request has unique id
 
 ### Testing
 App contains tests utilizing PHPUnit, you can run these typing:

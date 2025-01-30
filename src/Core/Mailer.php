@@ -39,6 +39,7 @@ class Mailer
      * @var Env
      */
     private Env $env;
+
     /**
      * @var PHPMailer
      */
