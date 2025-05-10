@@ -23,14 +23,14 @@ interface IMail
     public function getMessage(): string|array;
 
     /**
-     * @return string|array
+     * @return mixed
      */
-    public function getCCMail(): string|array;
+    public function getCCMail(): mixed;
 
     /**
-     * @return string|array
+     * @return mixed
      */
-    public function getBccMail(): string|array;
+    public function getBccMail(): mixed;
 
     /**
      * @return string|array

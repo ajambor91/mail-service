@@ -50,12 +50,18 @@ class Mailer
     private IMail $mail;
 
     /**
+     * @var bool
+     */
+    private bool $ssl;
+
+
+    /**
      * @param Mail $mail
      * @throws Exception
      */
-    public function __construct(Mail $mail)
+    public function __construct(Mail $mail, Env $env)
     {
-        $this->init($mail);
+        $this->init($mail, $env);
     }
 
     /**
@@ -64,13 +70,13 @@ class Mailer
      * @return void
      * @throws Exception
      */
-    private function init(Mail $mail): void
+    private function init(Mail $mail, Env $env): void
     {
+        $this->env = $env;
         if (empty($mail)) {
             throw new Exception("Mail cannot be empty");
         }
         $this->mail = $mail;
-        $this->env = Env::getInstance();
         $this->phpMailer = new PHPMailer(true);
         $host = $this->env->getHost();
         if (empty($host)) {
@@ -83,19 +89,12 @@ class Mailer
             throw new Exception("No port found");
         }
         $this->port = $port;
-        $password = $this->env->getPassword();
-        if (empty($password)) {
-            throw new Exception("No password found");
+        if (!empty($this->env->getPassword())) {
+            $this->password = $this->env->getPassword();
         }
-        $this->password = $password;
-        $username = $this->env->getUsername();
-
-        if (empty($username)) {
-            throw new Exception("No username found");
+        if (!empty($this->env->getUsername())) {
+            $this->username = $this->env->getUsername();
         }
-
-
-        $this->username = $username;
         $sender = $this->env->getSenderEmail();
         if (empty($sender)) {
             throw new Exception("Sender email cannot be null");
@@ -123,14 +122,16 @@ class Mailer
     {
         if ($this->isSMTP) {
             $this->phpMailer->isSMTP();
-            $this->phpMailer->SMTPAuth = true;
-            $this->phpMailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-
+            (new MailerSecuritySetup($this->phpMailer, $this->env))->setupSSL();
+            $this->phpMailer->Host = $this->hostServer;
+            $this->phpMailer->Port = $this->port;
+        } else {
+            $this->phpMailer->isMail();
+            $this->phpMailer->SMTPAuth = false;
         }
-        $this->phpMailer->Host = $this->hostServer;
-        $this->phpMailer->Username = $this->username;
-        $this->phpMailer->Password = $this->password;
-        $this->phpMailer->Port = $this->port;
+        if ($this->env->isPHPMailerDebugMode()) {
+            $this->phpMailer->SMTPDebug = \PHPMailer\PHPMailer\SMTP::DEBUG_CONNECTION;
+        }
         return $this;
     }
 

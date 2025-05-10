@@ -1,0 +1,16 @@
+services:
+  mail:
+    container_name: mail
+    hostname: mail
+    build:
+      context: 'app'
+      dockerfile: 'Dockerfile.fpm-composer'
+    volumes:
+      - './app/.env:/var/www/html/.env'
+  gateway:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/fastcgi.conf:/etc/nginx/snippets/fastcgi.conf
+    ports:
+      - 8011:80

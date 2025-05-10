@@ -34,10 +34,19 @@ class Guard
     private IHeaders $headers;
 
     /**
-     * @param IHeaders $headers
+     * @var Response
      */
-    public function __construct(IHeaders $headers)
+    private Response $response;
+
+    /**
+     * @param IHeaders $headers
+     * @param Env $env
+     * @param Response $response
+     */
+    public function __construct(IHeaders $headers, Env $env, Response $response)
     {
+        $this->response = $response;
+        $this->env = $env;
         $this->headers = $headers;
         $this->init();
     }
@@ -48,7 +57,6 @@ class Guard
      */
     private function init(): void
     {
-        $this->env = Env::getInstance();
         $this->allowedDomains = $this->env->getAllowedDomains();
         $this->secret = $this->env->getSecret();
     }
@@ -106,7 +114,7 @@ class Guard
 
             foreach ($this->allowedDomains as $allowedDomain) {
                 if ($allowedDomain === $this->headers->getHost()) {
-                    Response::getInstance()->setAllowedDomain($allowedDomain);
+                    $this->response->setAllowedDomain($allowedDomain);
                     return true;
                 }
             }

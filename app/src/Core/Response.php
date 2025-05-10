@@ -47,23 +47,10 @@ class Response
     /**
      * Private constructor to prevent creating object of this class in outside object
      */
-    private function __construct()
+    public function __construct(Env $env)
     {
-        $this->env = Env::getInstance();
+        $this->env = $env;
     }
-
-    /**
-     * Returning self instance
-     * @return Response
-     */
-    public static function getInstance(): Response
-    {
-        if (!Response::$instance) {
-            Response::$instance = new Response();
-        }
-        return Response::$instance;
-    }
-
 
     /**
      * Setting allowing domain
@@ -106,10 +93,32 @@ class Response
     }
 
     /**
+     * Return Http code
+     * @return int
+     */
+    public function getCode(): int
+    {
+        return $this->code;
+    }
+
+    /**
      * Returning HTTP response
      * @return void
      */
     public function returnResponse(): string|false
+    {
+
+
+        if ($this->env->getIsDebug() === true) {
+            return json_encode(array_merge($this->message, ['debugMessage' =>$this->debugMessage]));
+        }
+        return json_encode($this->message);
+
+    }
+    /**
+     * Sending HTTP headers
+     */
+    public function sendHeaders()
     {
         foreach ($this->headers as $key => $header) {
             header("$key: $header");
@@ -120,13 +129,6 @@ class Response
             return json_encode(['message' => "Message is empty"]);
         }
         http_response_code($this->code);
-
-        if ($this->env->getIsDebug() === true) {
-            echo $this->debugMessage;
-            return json_encode(array_merge($this->message, ['debugMessage' =>$this->debugMessage]));
-        }
-        return json_encode($this->message);
-
     }
 
 

@@ -1,0 +1,14 @@
+FROM php:8.2-fpm-alpine
+
+RUN apk add --no-cache bash git unzip curl && \
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+WORKDIR /var/www/html/
+COPY . /var/www/html/
+RUN rm -f ./.env.*
+RUN chown www-data:www-data . -R
+RUN chmod 755 . -R
+
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+RUN composer install
+RUN composer dump-autoload

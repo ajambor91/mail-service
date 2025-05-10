@@ -1,0 +1,14 @@
+services:
+  mail:
+    build:
+      context: 'app'
+      dockerfile: 'Dockerfile.fpm'
+    volumes:
+      - ./app:/var/www/html
+  gateway:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/fastcgi.conf:/etc/nginx/snippets/fastcgi.conf
+    ports:
+      - 8011:80

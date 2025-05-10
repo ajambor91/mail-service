@@ -5,13 +5,11 @@ namespace MailService\MailService\Core;
 use Exception;
 
 /**
- *
+ * Class for create HTML template
  */
 class HTMLMessage
 {
-    /**
-     *
-     */
+
     private const TEMPLATES_DIR = ROOT . "/templates";
     /**
      * @var string|null

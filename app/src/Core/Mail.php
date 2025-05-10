@@ -36,12 +36,12 @@ class Mail implements IMail
     /**
      * @var string|array
      */
-    private string|array $ccMail;
+    private mixed $ccMail;
 
     /**
-     * @var string|array
+     * @var mixed
      */
-    private string|array $bccMail;
+    private mixed $bccMail;
 
     /**
      * @var string
@@ -56,9 +56,9 @@ class Mail implements IMail
      * @param array $payload
      * @throws InvalidPayload
      */
-    public function __construct(array $payload)
+    public function __construct(array $payload, Env $env)
     {
-        $this->env = Env::getInstance();
+        $this->env = $env;
         $this->initMail($payload);
     }
 
@@ -90,21 +90,24 @@ class Mail implements IMail
         }
         $this->recipientMail = $recipientMail;
 
-        $ccMail = $payload['ccMail'] ?? $this->env->getCCMail();
-        if (!empty($ccMail)) {
-            if (!Helper::checkEmailValidity($ccMail)) {
+        $ccMail = $payload['ccMail'] ?? null;
+        if (!empty($ccMail) && !Helper::checkEmailValidity($ccMail)) {
+
                 throw new InvalidPayload("Invalid cc email email address");
 
-            }
-            $this->ccMail = $ccMail;
+
+        } else if (!empty($this->env->getCCMail())){
+            $ccMail = $this->env->getCCMail();
         }
-        $bccMail = $payload['bccMail'] ?? $this->env->getBCCMail();
-        if (!empty($bccMail)) {
-            if (!Helper::checkEmailValidity($bccMail)) {
+        $this->ccMail = $ccMail;
+
+        $bccMail = $payload['bccMail'] ?? null;
+        if (!empty($bccMail) && !Helper::checkEmailValidity($bccMail)) {
                 throw new InvalidPayload("Invalid bcc email address");
-            }
-            $this->bccMail = $bccMail;
+        } else if (!empty($this->env->getBCCMail())) {
+            $bccMail = $this->env->getBCCMail();
         }
+        $this->bccMail = $bccMail;
 
         if (!empty($payload['isHTML']) && $payload['isHTML'] === true) {
             $this->isHTML = true;
@@ -122,17 +125,17 @@ class Mail implements IMail
     }
 
     /**
-     * @return string|array
+     * @return mixed
      */
-    public function getCCMail(): string|array
+    public function getCCMail(): mixed
     {
         return $this->ccMail;
     }
 
     /**
-     * @return string|array
+     * @return mixed
      */
-    public function getBccMail(): string|array
+    public function getBccMail(): mixed
     {
         return $this->bccMail;
     }

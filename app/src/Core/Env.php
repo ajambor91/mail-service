@@ -4,6 +4,7 @@ namespace MailService\MailService\Core;
 
 use Dotenv\Dotenv;
 use Exception;
+use MailService\MailService\Enums\SSLEnum;
 
 /**
  * Helper for getting and parsing data from .env
@@ -81,19 +82,74 @@ class Env
     }
 
     /**
-     * @return string
+     * @retutn bool
      */
-    public function getPassword(): string
+    public function getSSL(): SSLEnum
     {
-        return $_ENV["PASSWORD"];
+
+        return SSLEnum::fromConfigValue($_ENV['SSL'] ?? false);
     }
 
     /**
      * @return string
      */
-    public function getUsername(): string
+    public function getDebugLevel(): string
     {
-        return $_ENV['USERNAME'];
+        $debugLevel = $_ENV['DEBUG_LEVEL'] ?? 'info';
+        return $debugLevel;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getSSLVerifyServerCert(): bool
+    {
+        $verifyCertServer = $_ENV['SSL_VERIFY_SERVER_CERT'];
+        if ($verifyCertServer === false || strtolower($verifyCertServer) === 'false') {
+            return false;
+        }
+        return  true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getSSLVerifyServerName(): bool
+    {
+        $sslVerifyServerName = $_ENV['SSL_VERIFY_SERVER_NAME'];
+        if ($sslVerifyServerName === false || strtolower($sslVerifyServerName) === 'false') {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getAllowingSelfSignCert() : bool
+    {
+        $allowSelfSignedSSLCerts = $_ENV['SSL_ALLOW_SELF_SIGNED'];
+        if ($allowSelfSignedSSLCerts === true || strtolower($allowSelfSignedSSLCerts) === 'true') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPassword(): ?string
+    {
+        return $_ENV["PASSWORD"] ?? null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUsername(): ?string
+    {
+        return $_ENV['USERNAME'] ?? null;
     }
 
     /**
@@ -144,13 +200,28 @@ class Env
     }
 
     /**
-     * @return array|string
+     * @return bool
      */
-    public function getBCCMail(): array|string
+    public function isPHPMailerDebugMode()
     {
-        $bccMail = $_ENV['BCC_MAIL'];
+        $phpMailerDebug = $_ENV['PHP_MAILER_DEBUG'] ?? null;
+        if (!empty($phpMailerDebug) && strtolower($phpMailerDebug) === 'true') {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBCCMail(): mixed
+    {
+        $bccMail = $_ENV['BCC_MAIL'] ?? null;
+        if (!$bccMail) {
+            return  null;
+        }
         $bccMail = Helper::parseEnvArray($bccMail);
-        if (!empty($bccMail) && !Helper::checkEmailValidity($bccMail)) {
+        if (!Helper::checkEmailValidity($bccMail)) {
             throw new Exception("Invalid bcc email in .env");
 
         }
@@ -158,13 +229,17 @@ class Env
     }
 
     /**
-     * @return array|string
+     * @return mixed
      */
-    public function getCCMail(): array|string
+    public function getCCMail(): mixed
     {
-        $ccMail = $_ENV['CC_MAIL'];
+        $ccMail = $_ENV['CC_MAIL'] ?? null;
+        if (!$ccMail) {
+            return  null;
+        }
         $ccMail = Helper::parseEnvArray($ccMail);
-        if (!empty($ccMail) && !Helper::checkEmailValidity($ccMail)) {
+
+        if (!Helper::checkEmailValidity($ccMail)) {
             throw new Exception("Invalid cc email in .env");
         }
         return count($ccMail) === 1 ? $ccMail[0] : $ccMail;

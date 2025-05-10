@@ -12,17 +12,11 @@ use MailService\MailService\Exceptions\InvalidSecret;
 class Headers implements IHeaders
 {
 
-    /**
-     *
-     */
-    private const HTTP_SECRET = 'HTTP_SECRET';
-    /**
-     *
-     */
+
+    private const HTTP_SECRET = 'HTTP_X_APP_SECRET';
+
     private const HTTP_HOST = 'HTTP_HOST';
-    /**
-     *
-     */
+
     private const CONTENT_TYPE = 'CONTENT_TYPE';
     /**
      * @var string|null
@@ -51,6 +45,7 @@ class Headers implements IHeaders
      */
     private function getHeaders(array $headers): void
     {
+
         foreach ($headers as $key => $header) {
             if (self::CONTENT_TYPE === $key) {
                 $this->contentType = $header;
