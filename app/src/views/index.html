@@ -1,7 +1,6 @@
 <html>
 <head>
     <title>Mail Service</title>
-    <link href="/src/views/style.css" rel="stylesheet" type="text/css">
 </head>
 <style>
     * {
@@ -147,7 +146,7 @@
         <p class="main-content__description">But styles block is ignored in many popular clients, so recommended is using inline style to each element you want to style</p>
 
         <h3 class="main-content__header">Debugging</h3>
-        <p class="main-content__description">For more errors information you can set environment IS_DEBUG on true in .env file. Then response from server will have another field as debugMessage</p>
+        <p class="main-content__description">You can enable debug mode by setting IS_DEBUG to true in the .env file. When this option is enabled, all server responses will include an additional debugMessage field. You can also enable PHPMailer's debug mode for more detailed output regarding email sending.</p>
 
         <h3 class="main-content__header">Testing</h3>
         <p class="main-content__description">Application contains tests, and you can run it type:</p>

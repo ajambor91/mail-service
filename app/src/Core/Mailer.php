@@ -50,18 +50,15 @@ class Mailer
     private IMail $mail;
 
     /**
-     * @var bool
-     */
-    private bool $ssl;
-
-
-    /**
      * @param Mail $mail
      * @throws Exception
      */
-    public function __construct(Mail $mail, Env $env)
+    public function __construct(Mail $mail, Env $env, PHPMailer $phpMailer)
     {
-        $this->init($mail, $env);
+        $this->phpMailer = $phpMailer;
+        $this->env = $env;
+        $this->mail = $mail;
+        $this->init();
     }
 
     /**
@@ -70,14 +67,12 @@ class Mailer
      * @return void
      * @throws Exception
      */
-    private function init(Mail $mail, Env $env): void
+    private function init(): void
     {
-        $this->env = $env;
-        if (empty($mail)) {
+
+        if (empty($this->mail)) {
             throw new Exception("Mail cannot be empty");
         }
-        $this->mail = $mail;
-        $this->phpMailer = new PHPMailer(true);
         $host = $this->env->getHost();
         if (empty($host)) {
             throw new Exception("No host found");
@@ -138,6 +133,7 @@ class Mailer
     /**
      * Method for preparing message
      * @return $this
+     * @throws \PHPMailer\PHPMailer\Exception
      */
     public function prepare(): self
     {
@@ -193,7 +189,7 @@ class Mailer
      */
     private function addBCC(): void
     {
-        $bcc = $this->mail->getBccMail();
+        $bcc = $this->mail->getBCCMail();
         if (empty($bcc)) {
             return;
         }

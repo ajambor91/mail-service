@@ -30,7 +30,7 @@ interface IMail
     /**
      * @return mixed
      */
-    public function getBccMail(): mixed;
+    public function getBCCMail(): mixed;
 
     /**
      * @return string|array

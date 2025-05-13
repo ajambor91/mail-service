@@ -19,6 +19,7 @@ use MailService\MailService\Factories\MailFactory;
 use MailService\MailService\Factories\ResponseFactory;
 use MailService\MailService\Factories\RouterFactory;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
+use PHPMailer\PHPMailer\PHPMailer;
 
 /**
  *
@@ -76,6 +77,10 @@ class App
      * @var Response
      */
     private Response $response;
+    /**
+     * @var PHPMailer
+     */
+    private PHPMailer $phpMailer;
 
 
     /**
@@ -101,7 +106,8 @@ class App
         RouterFactory $routerFactory,
         MailFactory $mailFactory,
         MailerFactory $mailerFactory,
-        ResponseFactory $responseFactory
+        ResponseFactory $responseFactory,
+        PHPMailer $phpMailer
     )
     {
         $this->env = $env;
@@ -118,6 +124,7 @@ class App
         $this->mailerFactory = $mailerFactory;
         $this->guardFactory = $guardFactory;
         $this->headersFactory = $headersFactory;
+        $this->phpMailer = $phpMailer;
     }
 
     /**
@@ -147,9 +154,7 @@ class App
             $guard = $this->guardFactory->create($this->headers, $this->env, $this->response);
             $this->logger->info($this->uuid, 'Starting access check.');
 
-            if (!$guard->checkAccess()) {
-                throw new \Exception("Access check failed unexpectedly (Guard returned false).");
-            }
+            $guard->checkAccess();
             $this->logger->notice($this->uuid, 'Access check successful.');
 
 
@@ -157,7 +162,7 @@ class App
             $this->logger->notice($this->uuid, 'Mail object created from payload.');
 
 
-            $mailer = $this->mailerFactory->create($mail, $this->env);
+            $mailer = $this->mailerFactory->create($mail, $this->env, $this->phpMailer);
             $this->logger->notice($this->uuid, 'Mailer instance created and configured.');
             $this->logger->info($this->uuid, 'Attempting to send email.');
             $mailer->setup()->prepare()->sendMessage();
@@ -166,28 +171,23 @@ class App
             $this->response->setMessage(["message" => "Message was send"]);
         } catch (InvalidSecret $e) {
             $this->logger->warning($this->uuid, "Access denied: Invalid Secret.", [
-                'error_message' => $e->getMessage(),
-                'client_ip' => $_SERVER['REMOTE_ADDR'] ?? 'N/A'
+                'error_message' => $e->getMessage()
             ]);
-            $this->response->setCode(401);
+            $this->response->setCode(403);
             $this->response->setMessage(["message" => "Invalid credential"]);
             $this->response->setDebugMessage($this->env->getIsDebug() ? $e->getMessage() : null);
 
         } catch (InvalidDomain $e) {
             $this->logger->warning($this->uuid, "Access denied: Invalid Domain.", [
-                'error_message' => $e->getMessage(),
-                'client_ip' => $_SERVER['REMOTE_ADDR'] ?? 'N/A',
-                'host' => $_SERVER['HTTP_HOST'] ?? 'N/A'
+                'error_message' => $e->getMessage()
             ]);
-            $this->response->setCode(401);
+            $this->response->setCode(403);
             $this->response->setMessage(["message" => "Invalid credential"]);
             $this->response->setDebugMessage($this->env->getIsDebug() ? $e->getMessage() : null);
 
         } catch (InvalidContentType $e) {
             $this->logger->warning($this->uuid, "Invalid Content Type.", [
-                'error_message' => $e->getMessage(),
-                'client_ip' => $_SERVER['REMOTE_ADDR'] ?? 'N/A',
-                'content_type' => $_SERVER['CONTENT_TYPE'] ?? 'N/A'
+                'error_message' => $e->getMessage()
             ]);
             $this->response->setCode(415);
             $this->response->setMessage(["message" => "Unsupported Media Type"]);
@@ -196,7 +196,6 @@ class App
         } catch (InvalidPayload $e) {
             $this->logger->warning($this->uuid, "Invalid Payload Exception.", [
                 'error_message' => $e->getMessage(),
-                'client_ip' => $_SERVER['REMOTE_ADDR'] ?? 'N/A',
                 'payload_preview' => substr(json_encode($this->payloadArr), 0, 200)
             ]);
             $this->response->setCode(400);
@@ -235,16 +234,17 @@ class App
             $this->response->setCode(500);
             $this->response->setMessage(["message" => "A fatal error occurred"]);
             $this->response->setDebugMessage($this->env->getIsDebug() ? $e->getMessage() : null);
+        } finally {
+            $this->response->sendHeaders();
+
+            echo $this->response->returnResponse();
+
+            $this->logger->info($this->uuid, 'Request handling finished.', ['http_status' => $this->response->getCode()]);
         }
 
 
-        $this->response->sendHeaders();
 
-        echo $this->response->returnResponse();
 
-        $this->logger->info($this->uuid, 'Request handling finished.', ['http_status' => $this->response->getCode()]);
-
-         exit;
     }
 
 

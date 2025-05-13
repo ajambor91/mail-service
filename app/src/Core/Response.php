@@ -129,6 +129,7 @@ class Response
             return json_encode(['message' => "Message is empty"]);
         }
         http_response_code($this->code);
+        return 1;
     }
 
 

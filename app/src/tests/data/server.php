@@ -1,9 +1,12 @@
 <?php
+const TEST_DOMAIN = "localhost";
+const VALID_ALLOWED_DOMAIN = [TEST_DOMAIN];
+const VALID_SECRET = "SECRET";
 
 const VALID_SERVER_DATA = [
-    'REQUEST_URI' => 'http://localhost/send',
+    'REQUEST_URI' => 'http://'. TEST_DOMAIN .'/send',
     'REQUEST_METHOD' => 'POST',
-    'HTTP_SECRET' => 'SECRET',
+    'HTTP_X_APP_SECRET' => VALID_SECRET,
     'HTTP_HOST' => 'localhost',
     'CONTENT_TYPE' => 'application/json'
 ];

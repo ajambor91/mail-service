@@ -6,7 +6,7 @@ use Exception;
 use Throwable;
 
 /**
- * Exception for invalid Content=Type header
+ * Exception for invalid SSL Option
  */
 class InvalidSSLType extends Exception
 {

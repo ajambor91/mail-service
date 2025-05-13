@@ -135,7 +135,7 @@ class Mail implements IMail
     /**
      * @return mixed
      */
-    public function getBccMail(): mixed
+    public function getBCCMail(): mixed
     {
         return $this->bccMail;
     }

@@ -2,7 +2,6 @@
 
 namespace MailService\MailService\Core;
 
-use DomainException;
 use MailService\MailService\Exceptions\InvalidContentType;
 use MailService\MailService\Exceptions\InvalidDomain;
 use MailService\MailService\Exceptions\InvalidSecret;
@@ -66,6 +65,7 @@ class Guard
      * @return bool
      * @throws InvalidContentType
      * @throws InvalidSecret
+     * @throws InvalidDomain
      */
     public function checkAccess(): bool
     {
@@ -73,6 +73,7 @@ class Guard
         $isRightSecret = $this->checkSecret();
         $isAppJson = $this->checkContentType();
         return $isAppJson && $isAllowedDomain && $isRightSecret;
+
     }
 
     /**

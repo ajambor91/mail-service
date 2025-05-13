@@ -31,9 +31,7 @@ class Headers implements IHeaders
      */
     private ?string $contentType = null;
 
-    /**
-     *
-     */
+
     public function __construct(array $headers)
     {
         $this->getHeaders($headers);
@@ -41,6 +39,7 @@ class Headers implements IHeaders
 
     /**
      * Parse request headers and set these for thic class
+     * @param array $headers
      * @return void
      */
     private function getHeaders(array $headers): void
