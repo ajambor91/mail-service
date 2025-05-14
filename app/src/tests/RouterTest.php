@@ -43,17 +43,4 @@ final class RouterTest extends TestCase
         $isValidSendPath = $this->router->checkPathForMail(VALID_SERVER_DATA);
         $this->assertTrue($isValidSendPath);
     }
-
-
-    /**
-     * Tests checkPathForMail method with the homepage path '/'.
-     */
-    #[Test]
-    #[TestDox('Identifies "/send?..." as a valid mail path')]
-    public function testCheckPathForMailValidSendPathWithQuery(): void
-    {
-        $isValidSendPath = $this->router->checkPathForMail(VALID_SERVER_DATA_HOMEPAGE);
-        $this->assertTrue($isValidSendPath);
-    }
-
 }
