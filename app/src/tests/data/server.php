@@ -10,7 +10,13 @@ const VALID_SERVER_DATA = [
     'HTTP_HOST' => 'localhost',
     'CONTENT_TYPE' => 'application/json'
 ];
-
+const VALID_SERVER_DATA_HOMEPAGE = [
+    'REQUEST_URI' => 'http://'. TEST_DOMAIN,
+    'REQUEST_METHOD' => 'POST',
+    'HTTP_X_APP_SECRET' => VALID_SECRET,
+    'HTTP_HOST' => 'localhost',
+    'CONTENT_TYPE' => 'application/json'
+];
 const INVALID_SERVER_DATA_SECRET = [
     'REQUEST_URI' => 'http://localhost/send',
     'REQUEST_METHOD' => 'POST',

@@ -37,26 +37,6 @@ class Headers implements IHeaders
         $this->getHeaders($headers);
     }
 
-    /**
-     * Parse request headers and set these for thic class
-     * @param array $headers
-     * @return void
-     */
-    private function getHeaders(array $headers): void
-    {
-
-        foreach ($headers as $key => $header) {
-            if (self::CONTENT_TYPE === $key) {
-                $this->contentType = $header;
-            }
-            if (self::HTTP_HOST === $key) {
-                $this->host = $header;
-            }
-            if (self::HTTP_SECRET === $key) {
-                $this->secret = $header;
-            }
-        }
-    }
 
     /**
      * Get Content-Type request header
@@ -96,4 +76,27 @@ class Headers implements IHeaders
         }
         return $this->host;
     }
+
+
+    /**
+     * Parse request headers and set these for thic class
+     * @param array $headers
+     * @return void
+     */
+    private function getHeaders(array $headers): void
+    {
+
+        foreach ($headers as $key => $header) {
+            if (self::CONTENT_TYPE === $key) {
+                $this->contentType = $header;
+            }
+            if (self::HTTP_HOST === $key) {
+                $this->host = $header;
+            }
+            if (self::HTTP_SECRET === $key) {
+                $this->secret = $header;
+            }
+        }
+    }
 }
+

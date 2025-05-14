@@ -20,9 +20,7 @@ class Env
      */
     private Dotenv $dotEnv;
 
-    /**
-     *
-     */
+
     private function __construct()
     {
 

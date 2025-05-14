@@ -134,7 +134,7 @@ final class AppTest extends TestCase
 
         // Create mocks for factories and core dependencies
         $this->createMocksAndFactories();
-        $this->createEnv(VALID_SECRET, VALID_ALLOWED_DOMAIN);
+        $this->createEnv();
         $this->app = new App(
             VALID_RAW_MESSAGE,
             VALID_SERVER_DATA,
@@ -187,7 +187,7 @@ final class AppTest extends TestCase
     /**
      * Helper method to configure the Env mock.
      */
-    private function createEnv(string $secret, array $allowedDomains, bool $isDebug = true): void
+    private function createEnv(string $secret = VALID_SECRET, array $allowedDomains = VALID_ALLOWED_DOMAIN, bool $isDebug = true): void
     {
         $this->env->method('getIsDebug')->willReturn($isDebug);
         $this->env->method('getSecret')->willReturn($secret);

@@ -380,7 +380,6 @@ final class MailerTest extends TestCase
         if ($isCC && $isArrays) {
             $this->mailMock->method('getCCMail')->willReturn([CC_TEST_EMAIL, ANOTHER_CC_TEST_EMAIL]);
         }
-        // If !$isCC, getCCMail() will return null (default mock behavior)
 
         if ($isBCC && !$isArrays) {
             $this->mailMock->method('getBCCMail')->willReturn(BCC_TEST_EMAIL);

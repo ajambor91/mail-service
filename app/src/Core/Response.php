@@ -13,10 +13,7 @@ class Response
      * @var string|null
      */
     private ?string $debugMessage = null;
-    /**
-     * @var Response|null
-     */
-    private static ?Response $instance = null;
+
     /**
      * @var array
      */
