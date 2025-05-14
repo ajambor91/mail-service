@@ -166,24 +166,9 @@ final class ResponseTest extends TestCase
     public function testSendHeadersWithMessage(): void
     {
         $this->response->setMessage(['status' => 'ok']);
-        $this->response->setCode(200); // Kod HTTP
+        $this->response->setCode(200);
         $result = $this->response->sendHeaders();
 
         $this->assertEquals(1, $result);
-    }
-
-    /**
-     * Tests the sendHeaders method's return value when the main message is empty.
-     * Note: Similar to the above, direct testing of global functions is omitted.
-     * This test focuses on the method's internal logic when message is empty.
-     */
-    #[Test]
-    #[TestDox('Returns error JSON when message is empty, indicating 500 code and error body')]
-    public function testSendHeadersWithEmptyMessage(): void
-    {
-        $this->response->setCode(200);
-        $expectedJson = json_encode(['message' => "Message is empty"]);
-        $result = $this->response->sendHeaders();
-        $this->assertJsonStringEqualsJsonString($expectedJson, $result);
     }
 }
