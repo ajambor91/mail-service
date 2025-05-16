@@ -15,6 +15,7 @@ use MailService\MailService\Exceptions\InvalidSecret;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/data/message.php';
@@ -30,19 +31,19 @@ final class GuardTest extends TestCase
 {
     /**
      * Mock object for IHeaders interface.
-     * @var IHeaders&\PHPUnit\Framework\MockObject\MockObject
+     * @var IHeaders&MockObject
      */
     private IHeaders $headersMock;
 
     /**
      * Mock object for Env class.
-     * @var Env&\PHPUnit\Framework\MockObject\MockObject
+     * @var Env&MockObject
      */
     private Env $envMock;
 
     /**
      * Mock object for Response class.
-     * @var Response&\PHPUnit\Framework\MockObject\MockObject;
+     * @var Response&MockObject;
      */
     private Response $responseMock;
 
@@ -52,16 +53,6 @@ final class GuardTest extends TestCase
      */
     private Guard $guard;
 
-    /**
-     * Sets up the test environment before each test method.
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->createMocks();
-        $this->configureEnv();
-        $this->guard = new Guard($this->headersMock, $this->envMock, $this->responseMock);
-    }
 
     /**
      * Tests successful access check with valid data.
@@ -139,6 +130,17 @@ final class GuardTest extends TestCase
         $this->responseMock->expects($this->once())->method('setAllowedDomain')->with(TEST_DOMAIN);
 
         $this->guard->checkAccess();
+    }
+
+    /**
+     * Sets up the test environment before each test method.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->createMocks();
+        $this->configureEnv();
+        $this->guard = new Guard($this->headersMock, $this->envMock, $this->responseMock);
     }
 
     /**

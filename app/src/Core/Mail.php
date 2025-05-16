@@ -44,10 +44,6 @@ class Mail implements IMail
     private mixed $bccMail;
 
     /**
-     * @var string
-     */
-    private string $senderMail;
-    /**
      * @var Env
      */
     private Env $env;
@@ -93,23 +89,26 @@ class Mail implements IMail
         $ccMail = $payload['ccMail'] ?? null;
         if (!empty($ccMail) && !Helper::checkEmailValidity($ccMail)) {
 
-                throw new InvalidPayload("Invalid cc email email address");
+            throw new InvalidPayload("Invalid cc email email address");
 
 
-        } else if (!empty($this->env->getCCMail())){
+        } else if (!empty($this->env->getCCMail()) && Helper::checkEmailValidity($this->env->getCCMail())) {
             $ccMail = $this->env->getCCMail();
         }
         $this->ccMail = $ccMail;
 
         $bccMail = $payload['bccMail'] ?? null;
         if (!empty($bccMail) && !Helper::checkEmailValidity($bccMail)) {
-                throw new InvalidPayload("Invalid bcc email address");
-        } else if (!empty($this->env->getBCCMail())) {
+            throw new InvalidPayload("Invalid bcc email address");
+        } else if (!empty($this->env->getBCCMail()) && Helper::checkEmailValidity($this->env->getBCCMail())) {
             $bccMail = $this->env->getBCCMail();
         }
         $this->bccMail = $bccMail;
 
-        if (!empty($payload['isHTML']) && $payload['isHTML'] === true) {
+        if (
+            (!empty($payload['isHTML']) && $payload['isHTML'] === true) ||
+            (empty($payload['isHTML']) && $this->env->getIsHTML() === true)
+        ) {
             $this->isHTML = true;
             if (!empty($payload['template'])) {
                 $this->template = $payload['template'];
@@ -141,6 +140,14 @@ class Mail implements IMail
     }
 
     /**
+     * @return bool
+     */
+    public function getIsHTML(): bool
+    {
+        return $this->isHTML;
+    }
+
+    /**
      * @return string
      */
     public function getTitle(): string
@@ -163,14 +170,6 @@ class Mail implements IMail
     public function getMessage(): string|array
     {
         return $this->message;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getIsHTML(): bool
-    {
-        return $this->isHTML;
     }
 
     /**

@@ -94,6 +94,22 @@ class Guard
     }
 
     /**
+     * Method iterating over .env domains and compare it to request's host
+     * @return bool
+     */
+    private function iterateOverDomains(): bool
+    {
+
+        foreach ($this->allowedDomains as $allowedDomain) {
+            if ($allowedDomain === $this->headers->getHost()) {
+                $this->response->setAllowedDomain($allowedDomain);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Checking secret
      * @return bool
      * @throws InvalidSecret
@@ -105,21 +121,6 @@ class Guard
 
         }
         return true;
-    }
-
-    /**
-     * Method iterating over .env domains and compare it to request's host
-     * @return bool
-     */
-    private function iterateOverDomains(): bool{
-
-            foreach ($this->allowedDomains as $allowedDomain) {
-                if ($allowedDomain === $this->headers->getHost()) {
-                    $this->response->setAllowedDomain($allowedDomain);
-                    return true;
-                }
-            }
-            return false;
     }
 
     /**

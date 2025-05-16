@@ -1,7 +1,17 @@
 <?php
+
+const MESSAGE_RECIPIENT_MAIL = "recipient@mail.com";
+const MESSAGE_MESSAGE_CONTENT = "Hello. This is a test message";
+const MESSAGE_MESSAGE_TITLE = "This is a test message's title";
 const VALID_RAW_MESSAGE = [
-    "recipientMail" => "recipient@mail.com",
-    "message" => "Test message"
+    "title" => MESSAGE_MESSAGE_TITLE,
+    "recipientMail" => MESSAGE_RECIPIENT_MAIL,
+    "message" => MESSAGE_MESSAGE_CONTENT
+];
+
+
+const VALID_RAW_SIMPLEST_MESSAGE = [
+    "message" => MESSAGE_MESSAGE_CONTENT
 ];
 
 const INVALID_RAW_MESSAGE = [

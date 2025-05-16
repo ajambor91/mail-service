@@ -9,7 +9,9 @@ use MailService\MailService\Core\Response;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 /**
  * Unit tests for the Response class.
@@ -19,7 +21,7 @@ final class ResponseTest extends TestCase
 {
     /**
      * Mock object for Env class.
-     * @var Env&\PHPUnit\Framework\MockObject\MockObject
+     * @var Env&MockObject
      */
     private Env $envMock;
 
@@ -28,31 +30,6 @@ final class ResponseTest extends TestCase
      * @var Response
      */
     private Response $response;
-
-    /**
-     * Sets up the test environment before each test method.
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->envMock = $this->createMock(Env::class);
-        $this->response = new Response($this->envMock);
-    }
-
-    /**
-     * Helper method to get the value of a private property using Reflection.
-     * Useful for checking the internal state modified by setter methods.
-     * @param object $object The object from which to get the property.
-     * @param string $propertyName The name of the private property.
-     * @return mixed The value of the private property.
-     */
-    private function getPrivatePropertyValue(object $object, string $propertyName): mixed
-    {
-        $reflection = new \ReflectionClass($object);
-        $property = $reflection->getProperty($propertyName);
-        $property->setAccessible(true);
-        return $property->getValue($object);
-    }
 
     /**
      * Tests setting the allowed domain header.
@@ -68,6 +45,21 @@ final class ResponseTest extends TestCase
 
         $this->assertArrayHasKey('Access-Control-Allow-Origin', $headers);
         $this->assertEquals($domain, $headers['Access-Control-Allow-Origin']);
+    }
+
+    /**
+     * Helper method to get the value of a private property using Reflection.
+     * Useful for checking the internal state modified by setter methods.
+     * @param object $object The object from which to get the property.
+     * @param string $propertyName The name of the private property.
+     * @return mixed The value of the private property.
+     */
+    private function getPrivatePropertyValue(object $object, string $propertyName): mixed
+    {
+        $reflection = new ReflectionClass($object);
+        $property = $reflection->getProperty($propertyName);
+        $property->setAccessible(true);
+        return $property->getValue($object);
     }
 
     /**
@@ -135,6 +127,7 @@ final class ResponseTest extends TestCase
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $actualJson);
     }
+
     /**
      * Tests the returnResponse method when debug mode is disabled.
      * Asserts that the returned JSON includes only the main message.
@@ -170,5 +163,15 @@ final class ResponseTest extends TestCase
         $result = $this->response->sendHeaders();
 
         $this->assertEquals(1, $result);
+    }
+
+    /**
+     * Sets up the test environment before each test method.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->envMock = $this->createMock(Env::class);
+        $this->response = new Response($this->envMock);
     }
 }

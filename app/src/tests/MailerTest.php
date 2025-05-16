@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace MailService\MailService\Tests;
 
+use Exception;
 use MailService\MailService\Core\Env;
 use MailService\MailService\Core\IMail;
 use MailService\MailService\Core\Mail;
 use MailService\MailService\Core\Mailer;
 use MailService\MailService\Enums\SSLEnum;
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/data/message.php';
@@ -27,17 +30,17 @@ require_once __DIR__ . '/data/env_data.php';
 final class MailerTest extends TestCase
 {
     /**
-     * @var IMail&\PHPUnit\Framework\MockObject\MockObject
+     * @var IMail&MockObject
      */
     private IMail $mailMock;
 
     /**
-     * @var Env&\PHPUnit\Framework\MockObject\MockObject
+     * @var Env&MockObject
      */
     private Env $envMock;
 
     /**
-     * @var PHPMailer&\PHPUnit\Framework\MockObject\MockObject
+     * @var PHPMailer&MockObject
      */
     private PHPMailer $phpMailerMock;
 
@@ -46,14 +49,6 @@ final class MailerTest extends TestCase
      */
     private Mailer $mailer;
 
-    /**
-     * Set up mocks before each test.
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->createMocks();
-    }
 
     /**
      * Tests SMTP setup without SSL.
@@ -76,6 +71,62 @@ final class MailerTest extends TestCase
         $this->assertEquals(ENV_SMTP_HOST, $this->phpMailerMock->Host);
         $this->assertEquals(ENV_SMTP_PORT, $this->phpMailerMock->Port);
         $this->assertEquals('', $this->phpMailerMock->SMTPSecure);
+    }
+
+    /**
+     * Helper method to configure the Env mock.
+     * This method is NOT changed, as per user request.
+     */
+    private function createEnv(
+        string  $secret,
+        array   $allowedDomains,
+        bool    $isDebug = true,
+        bool    $isPHPMailerDebug = false,
+        bool    $isSMTP = true,
+        SSLEnum $isSSL = SSLEnum::NONE,
+        string  $smtpHost = ENV_SMTP_HOST,
+        int     $smtpPort = ENV_SMTP_PORT,
+        string  $defaultTitle = ENV_DEFAULT_TITLE,
+        string  $defaultSenderMail = ENV_SENDER_EMAIL,
+        string  $defaultRecipientMail = ENV_RECIPIENT_EMAIL
+    ): void
+    {
+        $this->envMock->method('getIsDebug')->willReturn($isDebug);
+        $this->envMock->method('getSecret')->willReturn($secret);
+        $this->envMock->method('getAllowedDomains')->willReturn($allowedDomains);
+        $this->envMock->method('getIsSMTP')->willReturn($isSMTP);
+        $this->envMock->method('getHost')->willReturn($smtpHost);
+        $this->envMock->method('getPort')->willReturn($smtpPort);
+        $this->envMock->method('getSSL')->willReturn($isSSL);
+        $this->envMock->method('getSenderEmail')->willReturn($defaultSenderMail);
+        $this->envMock->method('getRecipientEmail')->willReturn($defaultRecipientMail);
+        $this->envMock->method('getDefaultTile')->willReturn($defaultTitle);
+        $this->envMock->method('getIsHTML')->willReturn(false); // Default for Env mock
+        $this->envMock->method('isPHPMailerDebugMode')->willReturn($isPHPMailerDebug);
+        $this->envMock->method('getDebugLevel')->willReturn('emergency');
+        $this->envMock->method('getSSLVerifyServerCert')->willReturn(false);
+        $this->envMock->method('getSSLVerifyServerName')->willReturn(false);
+        $this->envMock->method('getAllowingSelfSignCert')->willReturn(true);
+        $this->envMock->method('getPassword')->willReturn(null);
+        $this->envMock->method('getUsername')->willReturn(null);
+        $this->envMock->method('getBCCMail')->willReturn(null); // Default for Env mock for BCC from Env
+        $this->envMock->method('getCCMail')->willReturn(null);  // Default for Env mock for CC from Env
+    }
+
+    /**
+     * Set up mocks before each test.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->createMocks();
+    }
+
+    private function createMocks(): void
+    {
+        $this->envMock = $this->createMock(Env::class);
+        $this->mailMock = $this->createMock(Mail::class);
+        $this->phpMailerMock = $this->createMock(PHPMailer::class);
     }
 
     /**
@@ -124,7 +175,7 @@ final class MailerTest extends TestCase
         $mailer = $this->mailer->setup();
 
         $this->assertInstanceOf(Mailer::class, $mailer);
-        $this->assertEquals(\PHPMailer\PHPMailer\SMTP::DEBUG_CONNECTION, $this->phpMailerMock->SMTPDebug);
+        $this->assertEquals(SMTP::DEBUG_CONNECTION, $this->phpMailerMock->SMTPDebug);
     }
 
     /**
@@ -144,7 +195,7 @@ final class MailerTest extends TestCase
         $mailer = $this->mailer->setup();
 
         $this->assertInstanceOf(Mailer::class, $mailer);
-        $this->assertEquals(\PHPMailer\PHPMailer\SMTP::DEBUG_OFF, $this->phpMailerMock->SMTPDebug);
+        $this->assertEquals(SMTP::DEBUG_OFF, $this->phpMailerMock->SMTPDebug);
     }
 
     /**
@@ -203,7 +254,7 @@ final class MailerTest extends TestCase
 
     /**
      * Tests prepare method with CC and BCC.
-     * @throws \Exception
+     * @throws Exception
      */
     #[Test]
     #[TestDox('Prepare email message with CC and BCC')]
@@ -227,8 +278,48 @@ final class MailerTest extends TestCase
     }
 
     /**
+     * Helper method to set message data mock.
+     * This method is NOT changed, as per user request.
+     */
+    private function createMailData(
+        bool $isCC = true,
+        bool $isBCC = true,
+        bool $isTitle = true,
+        bool $isArrays = false
+    ): void
+    {
+        if ($isCC && !$isArrays) {
+            $this->mailMock->method('getCCMail')->willReturn(CC_TEST_EMAIL);
+        }
+
+        if ($isCC && $isArrays) {
+            $this->mailMock->method('getCCMail')->willReturn([CC_TEST_EMAIL, ANOTHER_CC_TEST_EMAIL]);
+        }
+
+        if ($isBCC && !$isArrays) {
+            $this->mailMock->method('getBCCMail')->willReturn(BCC_TEST_EMAIL);
+        }
+
+        if ($isBCC && $isArrays) {
+            $this->mailMock->method('getBCCMail')->willReturn([BCC_TEST_EMAIL, ANOTHER_BCC_TEST_EMAIL]);
+        }
+
+
+        if ($isTitle) {
+            $this->mailMock->method('getTitle')->willReturn(TEST_TITLE);
+        } else {
+            $this->mailMock->method('getTitle')->willReturn(null); // Explicitly null if no title
+        }
+
+
+        $this->mailMock->method('getIsHTML')->willReturn(false);
+        $this->mailMock->method('getRecipientMail')->willReturn(TEST_RECIPIENT_EMAIL);
+        $this->mailMock->method('getMessage')->willReturn(TEST_MESSAGE); // Assuming string message for non-HTML
+    }
+
+    /**
      * Tests prepare method with CC but no BCC.
-     * @throws \Exception
+     * @throws Exception
      */
     #[Test]
     #[TestDox('Prepare email message with CC and no BCC')]
@@ -253,7 +344,7 @@ final class MailerTest extends TestCase
 
     /**
      * Tests prepare method with BCC but no CC.
-     * @throws \Exception
+     * @throws Exception
      */
     #[Test]
     #[TestDox('Prepare email message with BCC and no CC')]
@@ -278,7 +369,7 @@ final class MailerTest extends TestCase
 
     /**
      * Tests prepare method with arrays for CC and BCC.
-     * @throws \Exception
+     * @throws Exception
      */
     #[Test]
     #[TestDox('Prepare email message with multiple CC and BCC addresses')]
@@ -315,90 +406,5 @@ final class MailerTest extends TestCase
 
         $this->phpMailerMock->expects($this->once())->method('send');
         $this->mailer->sendMessage();
-    }
-
-    private function createMocks(): void
-    {
-        $this->envMock = $this->createMock(Env::class);
-        $this->mailMock = $this->createMock(Mail::class);
-        $this->phpMailerMock = $this->createMock(PHPMailer::class);
-    }
-
-    /**
-     * Helper method to configure the Env mock.
-     * This method is NOT changed, as per user request.
-     */
-    private function createEnv(
-        string $secret,
-        array $allowedDomains,
-        bool $isDebug = true,
-        bool $isPHPMailerDebug = false,
-        bool $isSMTP = true,
-        SSLEnum $isSSL = SSLEnum::NONE,
-        string $smtpHost = ENV_SMTP_HOST,
-        int $smtpPort = ENV_SMTP_PORT,
-        string $defaultTitle = ENV_DEFAULT_TITLE,
-        string $defaultSenderMail = ENV_SENDER_EMAIL,
-        string $defaultRecipientMail = ENV_RECIPIENT_EMAIL
-    ): void {
-        $this->envMock->method('getIsDebug')->willReturn($isDebug);
-        $this->envMock->method('getSecret')->willReturn($secret);
-        $this->envMock->method('getAllowedDomains')->willReturn($allowedDomains);
-        $this->envMock->method('getIsSMTP')->willReturn($isSMTP);
-        $this->envMock->method('getHost')->willReturn($smtpHost);
-        $this->envMock->method('getPort')->willReturn($smtpPort);
-        $this->envMock->method('getSSL')->willReturn($isSSL);
-        $this->envMock->method('getSenderEmail')->willReturn($defaultSenderMail);
-        $this->envMock->method('getRecipientEmail')->willReturn($defaultRecipientMail);
-        $this->envMock->method('getDefaultTile')->willReturn($defaultTitle);
-        $this->envMock->method('getIsHTML')->willReturn(false); // Default for Env mock
-        $this->envMock->method('isPHPMailerDebugMode')->willReturn($isPHPMailerDebug);
-        $this->envMock->method('getDebugLevel')->willReturn('emergency');
-        $this->envMock->method('getSSLVerifyServerCert')->willReturn(false);
-        $this->envMock->method('getSSLVerifyServerName')->willReturn(false);
-        $this->envMock->method('getAllowingSelfSignCert')->willReturn(true);
-        $this->envMock->method('getPassword')->willReturn(null);
-        $this->envMock->method('getUsername')->willReturn(null);
-        $this->envMock->method('getBCCMail')->willReturn(null); // Default for Env mock for BCC from Env
-        $this->envMock->method('getCCMail')->willReturn(null);  // Default for Env mock for CC from Env
-    }
-
-    /**
-     * Helper method to set message data mock.
-     * This method is NOT changed, as per user request.
-     */
-    private function createMailData(
-        bool $isCC = true,
-        bool $isBCC = true,
-        bool $isTitle = true,
-        bool $isArrays = false
-    ): void {
-        if ($isCC && !$isArrays) {
-            $this->mailMock->method('getCCMail')->willReturn(CC_TEST_EMAIL);
-        }
-
-        if ($isCC && $isArrays) {
-            $this->mailMock->method('getCCMail')->willReturn([CC_TEST_EMAIL, ANOTHER_CC_TEST_EMAIL]);
-        }
-
-        if ($isBCC && !$isArrays) {
-            $this->mailMock->method('getBCCMail')->willReturn(BCC_TEST_EMAIL);
-        }
-
-        if ($isBCC && $isArrays) {
-            $this->mailMock->method('getBCCMail')->willReturn([BCC_TEST_EMAIL, ANOTHER_BCC_TEST_EMAIL]);
-        }
-
-
-        if ($isTitle) {
-            $this->mailMock->method('getTitle')->willReturn(TEST_TITLE);
-        } else {
-            $this->mailMock->method('getTitle')->willReturn(null); // Explicitly null if no title
-        }
-
-
-        $this->mailMock->method('getIsHTML')->willReturn(false);
-        $this->mailMock->method('getRecipientMail')->willReturn(TEST_RECIPIENT_EMAIL);
-        $this->mailMock->method('getMessage')->willReturn(TEST_MESSAGE); // Assuming string message for non-HTML
     }
 }

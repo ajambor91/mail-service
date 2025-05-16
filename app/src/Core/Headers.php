@@ -2,8 +2,8 @@
 
 namespace MailService\MailService\Core;
 
-use Exception;
 use MailService\MailService\Exceptions\InvalidContentType;
+use MailService\MailService\Exceptions\InvalidHost;
 use MailService\MailService\Exceptions\InvalidSecret;
 
 /**
@@ -34,56 +34,15 @@ class Headers implements IHeaders
 
     public function __construct(array $headers)
     {
-        $this->getHeaders($headers);
+        $this->parseHeaders($headers);
     }
-
-
-    /**
-     * Get Content-Type request header
-     * @return string
-     * @throws InvalidContentType
-     */
-    public function getContentType(): string
-    {
-        if (empty($this->contentType)) {
-            throw new InvalidContentType('No content type found');
-        }
-        return $this->contentType;
-    }
-
-    /**
-     * Get secret from request header
-     * @return string
-     * @throws InvalidSecret
-     */
-    public function getSecret(): string
-    {
-        if (empty($this->secret)) {
-            throw new InvalidSecret("No secret found");
-        }
-        return $this->secret;
-    }
-
-    /**
-     * Get host from request header
-     * @return string
-     * @throws Exception
-     */
-    public function getHost(): string
-    {
-        if (empty($this->host)) {
-            throw new Exception("No host found");
-        }
-        return $this->host;
-    }
-
 
     /**
      * Parse request headers and set these for thic class
      * @param array $headers
      * @return void
      */
-    private function getHeaders(array $headers): void
+    private function parseHeaders(array $headers): void
     {
 
         foreach ($headers as $key => $header) {
@@ -97,6 +56,44 @@ class Headers implements IHeaders
                 $this->secret = $header;
             }
         }
+        if (empty($this->contentType)) {
+            throw new InvalidContentType('No content type found');
+        }
+
+        if (empty($this->host)) {
+            throw new InvalidHost('No host found');
+        }
+
+        if (empty($this->secret)) {
+            throw new InvalidSecret("No secret found");
+        }
+    }
+
+    /**
+     * Get Content-Type request header
+     * @return string
+     */
+    public function getContentType(): string
+    {
+        return $this->contentType;
+    }
+
+    /**
+     * Get secret from request header
+     * @return string
+     */
+    public function getSecret(): string
+    {
+        return $this->secret;
+    }
+
+    /**
+     * Get host from request header
+     * @return string
+     */
+    public function getHost(): string
+    {
+        return $this->host;
     }
 }
 

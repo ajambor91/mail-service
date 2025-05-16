@@ -1,4 +1,5 @@
 <?php
+
 namespace MailService\MailService\Factories;
 
 use MailService\MailService\Core\Router;

@@ -2,8 +2,8 @@
 
 namespace MailService\MailService;
 
+use Exception;
 use MailService\MailService\Core\Env;
-
 use MailService\MailService\Core\IHeaders;
 use MailService\MailService\Core\Logger;
 use MailService\MailService\Core\Response;
@@ -20,6 +20,8 @@ use MailService\MailService\Factories\ResponseFactory;
 use MailService\MailService\Factories\RouterFactory;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 use PHPMailer\PHPMailer\PHPMailer;
+use Random\RandomException;
+use Throwable;
 
 /**
  *
@@ -94,20 +96,20 @@ class App
      * @param MailFactory $mailFactory
      * @param MailerFactory $mailerFactory
      * @param ResponseFactory $responseFactory
-     * @throws \Random\RandomException
+     * @throws RandomException
      */
     public function __construct(
-        array $payloadArr,
-        array $serverArr,
-        Logger $logger,
-        Env $env,
-        HeadersFactory $headersFactory,
-        GuardFactory $guardFactory,
-        RouterFactory $routerFactory,
-        MailFactory $mailFactory,
-        MailerFactory $mailerFactory,
+        array           $payloadArr,
+        array           $serverArr,
+        Logger          $logger,
+        Env             $env,
+        HeadersFactory  $headersFactory,
+        GuardFactory    $guardFactory,
+        RouterFactory   $routerFactory,
+        MailFactory     $mailFactory,
+        MailerFactory   $mailerFactory,
         ResponseFactory $responseFactory,
-        PHPMailer $phpMailer
+        PHPMailer       $phpMailer
     )
     {
         $this->env = $env;
@@ -146,7 +148,7 @@ class App
                 $view->showView();
                 $this->logger->info($this->uuid, 'Request handling finished (view displayed).');
                 exit;
-                }
+            }
             $this->logger->info($this->uuid, 'Request path matches mail endpoint.');
             $this->headers = $this->headersFactory->create($this->serverArr);
             $this->logger->debug($this->uuid, 'Headers object created and parsed.');
@@ -211,7 +213,7 @@ class App
             $this->response->setMessage(["message" => "Failed to send email"]);
             $this->response->setDebugMessage($this->env->getIsDebug() ? $e->getMessage() : null);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->critical($this->uuid, "Unexpected Application Exception.", [
                 'error_message' => $e->getMessage(),
                 'exception_type' => get_class($e),
@@ -223,7 +225,7 @@ class App
             $this->response->setMessage(["message" => "An internal error occurred"]);
             $this->response->setDebugMessage($this->env->getIsDebug() ? $e->getMessage() : null);
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->emergency($this->uuid, "EMERGENCY: Uncaught Throwable.", [
                 'error_message' => $e->getMessage(),
                 'exception_type' => get_class($e),
@@ -243,11 +245,7 @@ class App
         }
 
 
-
-
     }
-
-
 
 
 }

@@ -25,15 +25,6 @@ final class RouterTest extends TestCase
     private Router $router;
 
     /**
-     * Sets up the test environment before each test method.
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->router = new Router();
-    }
-
-    /**
      * Tests checkPathForMail method with a valid '/send' path.
      */
     #[Test]
@@ -42,5 +33,14 @@ final class RouterTest extends TestCase
     {
         $isValidSendPath = $this->router->checkPathForMail(VALID_SERVER_DATA);
         $this->assertTrue($isValidSendPath);
+    }
+
+    /**
+     * Sets up the test environment before each test method.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->router = new Router();
     }
 }

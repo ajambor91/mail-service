@@ -32,7 +32,7 @@ class MailerSecuritySetup
      */
     public function setupSSL(): void
     {
-        $sslEncryption =  $this->env->getSSL()->value;
+        $sslEncryption = $this->env->getSSL()->value;
         $this->phpMailer->SMTPSecure = $sslEncryption;
 
         if ($sslEncryption) {

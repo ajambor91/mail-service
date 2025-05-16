@@ -4,6 +4,7 @@ namespace MailService\MailService\Core;
 
 use Exception;
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
 
 /**
  * Mailer class, responsible for building PHPMailer object and sending messages
@@ -125,7 +126,7 @@ class Mailer
             $this->phpMailer->SMTPAuth = false;
         }
         if ($this->env->isPHPMailerDebugMode()) {
-            $this->phpMailer->SMTPDebug = \PHPMailer\PHPMailer\SMTP::DEBUG_CONNECTION;
+            $this->phpMailer->SMTPDebug = SMTP::DEBUG_CONNECTION;
         }
         return $this;
     }

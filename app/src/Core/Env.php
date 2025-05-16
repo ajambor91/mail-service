@@ -106,7 +106,7 @@ class Env
         if ($verifyCertServer === false || strtolower($verifyCertServer) === 'false') {
             return false;
         }
-        return  true;
+        return true;
     }
 
     /**
@@ -124,7 +124,7 @@ class Env
     /**
      * @return bool
      */
-    public function getAllowingSelfSignCert() : bool
+    public function getAllowingSelfSignCert(): bool
     {
         $allowSelfSignedSSLCerts = $_ENV['SSL_ALLOW_SELF_SIGNED'];
         if ($allowSelfSignedSSLCerts === true || strtolower($allowSelfSignedSSLCerts) === 'true') {
@@ -181,7 +181,7 @@ class Env
     /**
      * @return string|array
      */
-    public function getRecipientEmail(): string|array
+    public function getRecipientEmail(): string|array|null
     {
 
         $recipientMail = $_ENV['RECIPIENT_MAIL'];
@@ -191,9 +191,7 @@ class Env
         } elseif (count($recipientMail) === 1) {
             $recipientMail = $recipientMail[0];
         }
-        if (!empty($recipientMail) && !Helper::checkEmailValidity($recipientMail)) {
-            throw new Exception("Invalid recipient email in .env");
-        }
+
         return $recipientMail;
     }
 
@@ -216,7 +214,7 @@ class Env
     {
         $bccMail = $_ENV['BCC_MAIL'] ?? null;
         if (!$bccMail) {
-            return  null;
+            return null;
         }
         $bccMail = Helper::parseEnvArray($bccMail);
         if (!Helper::checkEmailValidity($bccMail)) {
@@ -233,7 +231,7 @@ class Env
     {
         $ccMail = $_ENV['CC_MAIL'] ?? null;
         if (!$ccMail) {
-            return  null;
+            return null;
         }
         $ccMail = Helper::parseEnvArray($ccMail);
 

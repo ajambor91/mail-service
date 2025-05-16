@@ -2,10 +2,11 @@
 
 namespace MailService\MailService\Core;
 
-use Throwable;
+use DateTime;
+use RuntimeException;
 
 /**
- *
+ * Class for logging
  */
 class Logger
 {
@@ -39,16 +40,34 @@ class Logger
     private string $minLogLevel = 'info';
 
     /**
-     * @var Logger|null
-     */
-    private static ?Logger $instance = null;
-
-    /**
      * @param Env $env
      */
     public function __construct(Env $env)
     {
         $this->initialize($env);
+    }
+
+    /**
+     * @param Env $env
+     * @return void
+     */
+    private function initialize(Env $env): void
+    {
+
+        $this->minLogLevel = $env->getDebugLevel();
+        $logDir = self::LOG_DIR;
+
+        if (!is_dir($logDir)) {
+            if (!mkdir($logDir, 0775, true)) {
+                error_log(sprintf("FATAL ERROR: Failed to create log directory: %s. Check permissions. UUID: %s", $logDir, $this->uuid ?? 'N/A'));
+                throw new RuntimeException(sprintf("Log directory %s does not exist and could not be created.", $logDir));
+            }
+        }
+
+        if (!is_writable($logDir)) {
+            error_log(sprintf("FATAL ERROR: Log directory is not writable: %s. Check permissions. UUID: %s", $logDir, $this->uuid ?? 'N/A'));
+            throw new RuntimeException(sprintf("Log directory %s is not writable.", $logDir));
+        }
     }
 
     /**
@@ -60,6 +79,52 @@ class Logger
     public function debug(string $uuid, string $message, array $context = []): void
     {
         $this->logToFile($uuid, $message, 'debug', $context);
+    }
+
+    /**
+     * @param string $uuid
+     * @param string $message
+     * @param string $level
+     * @param array $context
+     * @return void
+     */
+    private function logToFile(string $uuid, string $message, string $level, array $context = []): void
+    {
+        if (!$this->shouldLog($level)) {
+            return;
+        }
+
+        $logFilePath = rtrim(self::LOG_DIR, '/') . '/' . ltrim(self::LOG_FILENAME, '/');
+
+        $now = new DateTime();
+        $formattedDate = $now->format('Y-m-d H:i:s');
+
+        $logLine = sprintf("[%s] [%s] UUID: %s %s", $formattedDate, strtoupper($level), $uuid, $message);
+
+        if (!empty($context)) {
+            $logLine .= ' Context: ' . json_encode($context);
+        }
+
+        $logLine .= "\n";
+
+        $result = file_put_contents($logFilePath, $logLine, FILE_APPEND | LOCK_EX);
+
+        if ($result === false) {
+            error_log(sprintf("FATAL ERROR: Failed to write log entry to file %s for level %s. Check file permissions and disk space. Original message UUID: %s",
+                $logFilePath, $level, $uuid));
+        }
+    }
+
+    /**
+     * @param string $level
+     * @return bool
+     */
+    private function shouldLog(string $level): bool
+    {
+        $levelValue = self::LEVEL_MAP[$level] ?? 0;
+        $minLevelValue = self::LEVEL_MAP[$this->minLogLevel] ?? 0;
+
+        return $levelValue >= $minLevelValue || true;
     }
 
     /**
@@ -137,76 +202,6 @@ class Logger
     public function emergency(string $uuid, string $message, array $context = []): void
     {
         $this->logToFile($uuid, $message, 'emergency', $context);
-    }
-
-    /**
-     * @param Env $env
-     * @return void
-     */
-    private function initialize(Env $env): void
-    {
-
-        $this->minLogLevel = $env->getDebugLevel();
-        $logDir = self::LOG_DIR;
-
-        if (!is_dir($logDir)) {
-            if (!mkdir($logDir, 0775, true)) {
-                error_log(sprintf("FATAL ERROR: Failed to create log directory: %s. Check permissions. UUID: %s", $logDir, $this->uuid ?? 'N/A'));
-                throw new \RuntimeException(sprintf("Log directory %s does not exist and could not be created.", $logDir));
-            }
-        }
-
-        if (!is_writable($logDir)) {
-            error_log(sprintf("FATAL ERROR: Log directory is not writable: %s. Check permissions. UUID: %s", $logDir, $this->uuid ?? 'N/A'));
-            throw new \RuntimeException(sprintf("Log directory %s is not writable.", $logDir));
-        }
-    }
-
-    /**
-     * @param string $level
-     * @return bool
-     */
-    private function shouldLog(string $level): bool
-    {
-        $levelValue = self::LEVEL_MAP[$level] ?? 0;
-        $minLevelValue = self::LEVEL_MAP[$this->minLogLevel] ?? 0;
-
-        return $levelValue >= $minLevelValue || true;
-    }
-
-
-    /**
-     * @param string $uuid
-     * @param string $message
-     * @param string $level
-     * @param array $context
-     * @return void
-     */
-    private function logToFile(string $uuid, string $message, string $level, array $context = []): void
-    {
-        if (!$this->shouldLog($level)) {
-            return;
-        }
-
-        $logFilePath = rtrim(self::LOG_DIR, '/') . '/' . ltrim(self::LOG_FILENAME, '/');
-
-        $now = new \DateTime();
-        $formattedDate = $now->format('Y-m-d H:i:s');
-
-        $logLine = sprintf("[%s] [%s] UUID: %s %s", $formattedDate, strtoupper($level), $uuid, $message);
-
-        if (!empty($context)) {
-            $logLine .= ' Context: ' . json_encode($context);
-        }
-
-        $logLine .= "\n";
-
-        $result = file_put_contents($logFilePath, $logLine, FILE_APPEND | LOCK_EX);
-
-        if ($result === false) {
-            error_log(sprintf("FATAL ERROR: Failed to write log entry to file %s for level %s. Check file permissions and disk space. Original message UUID: %s",
-                $logFilePath, $level, $uuid));
-        }
     }
 
 

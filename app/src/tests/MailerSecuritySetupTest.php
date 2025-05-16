@@ -11,6 +11,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -21,13 +22,13 @@ final class MailerSecuritySetupTest extends TestCase
 {
     /**
      * Mock object for PHPMailer.
-     * @var PHPMailer&\PHPUnit\Framework\MockObject\MockObject
+     * @var PHPMailer&MockObject
      */
     private PHPMailer $phpMailerMock;
 
     /**
      * Mock object for Env class.
-     * @var Env&\PHPUnit\Framework\MockObject\MockObject
+     * @var Env&MockObject
      */
     private Env $envMock;
 
@@ -37,16 +38,6 @@ final class MailerSecuritySetupTest extends TestCase
      */
     private MailerSecuritySetup $mailerSecuritySetup;
 
-    /**
-     * Sets up the test environment before each test method.
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->phpMailerMock = $this->createMock(PHPMailer::class);
-        $this->envMock = $this->createMock(Env::class);
-        $this->mailerSecuritySetup = new MailerSecuritySetup($this->phpMailerMock, $this->envMock);
-    }
 
     /**
      * Tests that setupSSL sets SMTPSecure to empty for no SSL.
@@ -58,6 +49,27 @@ final class MailerSecuritySetupTest extends TestCase
         $this->configureEnv(SSLEnum::NONE);
         $this->mailerSecuritySetup->setupSSL();
         $this->assertEmpty($this->phpMailerMock->SMTPSecure, 'SMTPSecure should be empty for no SSL.');
+    }
+
+    /**
+     * Helper method to configure the Env mock with specific values for testing MailerSecuritySetup.
+     */
+    private function configureEnv(
+        SSLEnum     $sslOption = SSLEnum::NONE,
+        string|null $testUserName = "Test user",
+        string|null $testUserPassword = "Testpassword",
+        bool        $getSSLVerifyServerCert = true,
+        bool        $getSSLVerifyServerName = true,
+        bool        $getAllowingSelfSignCert = false
+    ): void
+    {
+        $this->envMock->method('getSSL')->willReturn($sslOption);
+        $this->envMock->method('getSSLVerifyServerCert')->willReturn($getSSLVerifyServerCert);
+        $this->envMock->method('getSSLVerifyServerName')->willReturn($getSSLVerifyServerName);
+        $this->envMock->method('getAllowingSelfSignCert')->willReturn($getAllowingSelfSignCert);
+        $this->envMock->method('getPassword')->willReturn($testUserPassword);
+        $this->envMock->method('getUsername')->willReturn($testUserName);
+
     }
 
     /**
@@ -141,22 +153,13 @@ final class MailerSecuritySetupTest extends TestCase
     }
 
     /**
-     * Helper method to configure the Env mock with specific values for testing MailerSecuritySetup.
+     * Sets up the test environment before each test method.
      */
-    private function configureEnv(
-        SSLEnum $sslOption = SSLEnum::NONE,
-        string | null $testUserName = "Test user",
-        string |null $testUserPassword = "Testpassword",
-        bool $getSSLVerifyServerCert = true,
-        bool $getSSLVerifyServerName = true,
-        bool $getAllowingSelfSignCert = false
-    ): void {
-        $this->envMock->method('getSSL')->willReturn($sslOption);
-        $this->envMock->method('getSSLVerifyServerCert')->willReturn($getSSLVerifyServerCert);
-        $this->envMock->method('getSSLVerifyServerName')->willReturn($getSSLVerifyServerName);
-        $this->envMock->method('getAllowingSelfSignCert')->willReturn($getAllowingSelfSignCert);
-        $this->envMock->method('getPassword')->willReturn($testUserPassword);
-        $this->envMock->method('getUsername')->willReturn($testUserName);
-
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->phpMailerMock = $this->createMock(PHPMailer::class);
+        $this->envMock = $this->createMock(Env::class);
+        $this->mailerSecuritySetup = new MailerSecuritySetup($this->phpMailerMock, $this->envMock);
     }
 }

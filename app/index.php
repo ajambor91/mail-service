@@ -18,7 +18,8 @@ function getPayload(): array
 {
     return json_decode(file_get_contents('php://input'), true) ?? [];
 }
-$env  = Env::getInstance();
+
+$env = Env::getInstance();
 $logger = new Logger($env);
 $app = new App(
     getPayload(),

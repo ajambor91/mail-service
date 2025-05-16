@@ -80,6 +80,15 @@ class Response
     }
 
     /**
+     * Return Http code
+     * @return int
+     */
+    public function getCode(): int
+    {
+        return $this->code;
+    }
+
+    /**
      * Setting HTTP response code
      * @param int $code
      * @return void
@@ -87,15 +96,6 @@ class Response
     public function setCode(int $code): void
     {
         $this->code = $code;
-    }
-
-    /**
-     * Return Http code
-     * @return int
-     */
-    public function getCode(): int
-    {
-        return $this->code;
     }
 
     /**
@@ -107,11 +107,12 @@ class Response
 
 
         if ($this->env->getIsDebug() === true) {
-            return json_encode(array_merge($this->message, ['debugMessage' =>$this->debugMessage]));
+            return json_encode(array_merge($this->message, ['debugMessage' => $this->debugMessage]));
         }
         return json_encode($this->message);
 
     }
+
     /**
      * Sending HTTP headers
      */

@@ -1,15 +1,16 @@
 <?php
-    namespace MailService\MailService\Factories;
 
-    use MailService\MailService\Core\Env;
-    use MailService\MailService\Core\Guard;
-    use MailService\MailService\Core\IHeaders;
-    use MailService\MailService\Core\Response;
+namespace MailService\MailService\Factories;
 
-    class GuardFactory
+use MailService\MailService\Core\Env;
+use MailService\MailService\Core\Guard;
+use MailService\MailService\Core\IHeaders;
+use MailService\MailService\Core\Response;
+
+class GuardFactory
+{
+    public function create(IHeaders $headers, Env $env, Response $response): Guard
     {
-        public function create(IHeaders $headers, Env $env, Response $response): Guard
-        {
-            return new Guard($headers, $env, $response);
-        }
+        return new Guard($headers, $env, $response);
     }
+}
